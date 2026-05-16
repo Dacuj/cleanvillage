@@ -239,6 +239,7 @@ function CategoryShowcase({ tweaks }) {
 
 function CategoryRow({ cat, onClick }) {
   const [hover, setHover] = useState(false);
+  if (!cat) return null;
   return (
     <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
@@ -261,6 +262,7 @@ function CategoryRow({ cat, onClick }) {
 function CategoryTile({ cat, size = 'md', onClick, style: extraStyle }) {
   const [hover, setHover] = useState(false);
   const big = size === 'xl';
+  if (!cat) return null;
   return (
     <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
@@ -308,6 +310,7 @@ function CategoryTile({ cat, size = 'md', onClick, style: extraStyle }) {
 
 function CategoryPill({ cat, onClick }) {
   const [hover, setHover] = useState(false);
+  if (!cat) return null;
   return (
     <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
