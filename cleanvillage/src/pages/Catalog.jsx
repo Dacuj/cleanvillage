@@ -4,9 +4,11 @@ import { Icon, Button, Eyebrow } from '../components/ui.jsx';
 import { inputStyle, Check } from '../components/fields.jsx';
 import { ProductCard } from '../components/product.jsx';
 import { listCategories, listProducts } from '../lib/api.js';
+import { useIsMobile } from '../lib/useBreakpoint.js';
 
 export default function Catalog() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [activeCat, setActiveCat] = useState('all');
   const [activeFilters, setActiveFilters] = useState(['Disponibile']);
   const [sort, setSort] = useState('relevance');
@@ -14,6 +16,7 @@ export default function Catalog() {
   const [view, setView] = useState('grid');
   const [cats, setCats] = useState([]);
   const [products, setProducts] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([listCategories(), listProducts()]).then(([c, p]) => {
@@ -65,41 +68,63 @@ export default function Catalog() {
         </div>
       </section>
 
-      <section style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '40px 32px 96px', display: 'grid', gridTemplateColumns: '260px 1fr', gap: 36 }}>
-        <FilterSidebar
-          cats={cats}
-          activeCat={activeCat}
-          onCatChange={setActiveCat}
-          activeFilters={activeFilters}
-          setActiveFilters={setActiveFilters}
-        />
+      <section style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '24px 16px 64px' : '40px 32px 96px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '260px 1fr', gap: 36 }}>
+        {!isMobile && (
+          <FilterSidebar
+            cats={cats}
+            activeCat={activeCat}
+            onCatChange={setActiveCat}
+            activeFilters={activeFilters}
+            setActiveFilters={setActiveFilters}
+          />
+        )}
+
+        {isMobile && sidebarOpen && (
+          <>
+            <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
+            <div style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '85vw', maxWidth: 320, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', padding: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <span style={{ fontWeight: 600, fontSize: 16 }}>Filtri</span>
+                <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}><Icon name="x" size={20} /></button>
+              </div>
+              <FilterSidebar cats={cats} activeCat={activeCat} onCatChange={(c) => { setActiveCat(c); setSidebarOpen(false); }} activeFilters={activeFilters} setActiveFilters={setActiveFilters} />
+            </div>
+          </>
+        )}
 
         <div>
           {/* Toolbar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 22, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              {isMobile && (
+                <button onClick={() => setSidebarOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: 13, fontWeight: 500, color: 'var(--fg-primary)' }}>
+                  <Icon name="sliders-horizontal" size={14} /> Filtri {activeCat !== 'all' && '· 1'}
+                </button>
+              )}
               {activeFilters.length > 0 && (
                 <>
-                  <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600 }}>Filtri attivi</span>
+                  {!isMobile && <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600 }}>Filtri attivi</span>}
                   {activeFilters.map(f => <FilterChip key={f} onRemove={() => removeFilter(f)}>{f}</FilterChip>)}
-                  <button onClick={() => setActiveFilters([])} style={{ background: 'transparent', border: 'none', color: 'var(--color-teal-500)', fontSize: 12, fontWeight: 500, textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Azzera tutto</button>
+                  <button onClick={() => setActiveFilters([])} style={{ background: 'transparent', border: 'none', color: 'var(--color-teal-500)', fontSize: 12, fontWeight: 500, textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Azzera</button>
                 </>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <span style={{ fontSize: 13, color: 'var(--fg-secondary)', fontFamily: 'var(--font-mono)' }}>
-                <b style={{ color: 'var(--fg-primary)', fontWeight: 600 }}>{filtered.length}</b> di {products.length} risultati
+                <b style={{ color: 'var(--fg-primary)', fontWeight: 600 }}>{filtered.length}</b> risultati
               </span>
-              <span style={{ width: 1, height: 18, background: 'var(--border-subtle)' }} />
-              <div style={{ display: 'inline-flex', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: 2 }}>
-                <ViewBtn active={view === 'grid'} onClick={() => setView('grid')} icon="grid-3x3" label="3 colonne" />
-                <ViewBtn active={view === 'dense'} onClick={() => setView('dense')} icon="rows-3" label="4 colonne" />
-              </div>
+              {!isMobile && <>
+                <span style={{ width: 1, height: 18, background: 'var(--border-subtle)' }} />
+                <div style={{ display: 'inline-flex', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: 2 }}>
+                  <ViewBtn active={view === 'grid'} onClick={() => setView('grid')} icon="grid-3x3" label="3 colonne" />
+                  <ViewBtn active={view === 'dense'} onClick={() => setView('dense')} icon="rows-3" label="4 colonne" />
+                </div>
+              </>}
             </div>
           </div>
 
           {/* Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: view === 'dense' ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : (view === 'dense' ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)'), gap: isMobile ? 12 : 18 }}>
             {filtered.map(p => (
               <ProductCard key={p.id} product={p} dense={view === 'dense'} onClick={() => navigate(`/product/${p.id}`)} />
             ))}

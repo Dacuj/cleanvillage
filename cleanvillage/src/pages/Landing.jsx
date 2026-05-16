@@ -5,6 +5,7 @@ import { ProductCard, ProductIllustration } from '../components/product.jsx';
 import { ImageSlot } from '../components/ImageSlot.jsx';
 import { TweaksContext } from '../components/TweaksPanel.jsx';
 import { useCategories, useBrands, useProducts, useCourses, useIndustries } from '../lib/storefront.js';
+import { useIsMobile } from '../lib/useBreakpoint.js';
 
 export default function Landing() {
   const tweaks = useContext(TweaksContext) || {};
@@ -27,17 +28,18 @@ export default function Landing() {
 
 function Hero({ tweaks }) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const tone = tweaks?.headlineTone || 'human';
   return (
     <section style={{ background: 'var(--bg-surface)', position: 'relative' }}>
       <TrustBar height={3} />
-      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '72px 32px 0' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 64, alignItems: 'center' }}>
+      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '40px 20px 0' : '72px 32px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 1fr', gap: isMobile ? 36 : 64, alignItems: 'center' }}>
           <div>
             <Eyebrow>Distributore B2B · Italia &amp; UE · dal 1985</Eyebrow>
             <h1 style={{
               fontFamily: 'var(--font-display)', fontWeight: 200,
-              fontSize: 'clamp(48px, 6.6vw, 84px)', lineHeight: 0.98,
+              fontSize: 'clamp(38px, 6.6vw, 84px)', lineHeight: 0.98,
               letterSpacing: '-0.04em', color: 'var(--fg-primary)',
               margin: '24px 0 26px', textWrap: 'balance'
             }}>
@@ -46,31 +48,33 @@ function Hero({ tweaks }) {
                 <>Macchinari e forniture per chi <em style={{ fontStyle: 'normal', color: 'var(--color-teal-500)', fontWeight: 300 }}>pulisce di mestiere</em>.</>
               }
             </h1>
-            <p style={{ fontSize: 18, lineHeight: 1.55, color: 'var(--fg-secondary)', maxWidth: '52ch', margin: '0 0 36px', fontWeight: 400 }}>
+            <p style={{ fontSize: isMobile ? 16 : 18, lineHeight: 1.55, color: 'var(--fg-secondary)', maxWidth: '52ch', margin: '0 0 36px', fontWeight: 400 }}>
               Quarant'anni di forniture per imprese di pulizia, fabbriche e strutture in tutto il Sud Italia. Oltre <b style={{ color: 'var(--fg-primary)', fontWeight: 600 }}>500 codici a magazzino</b>, <b style={{ color: 'var(--fg-primary)', fontWeight: 600 }}>24 marchi</b>, preventivo entro 24 ore.
             </p>
             <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
               <Button variant="cta" size="lg" onClick={() => navigate('/contact')} iconRight={<Icon name="arrow-right" size={14} />}>Richiedi un Preventivo</Button>
-              <Button variant="secondary" size="lg" onClick={() => navigate('/catalog')} iconRight={<Icon name="chevron-right" size={14} />}>Esplora il Catalogo</Button>
+              {!isMobile && <Button variant="secondary" size="lg" onClick={() => navigate('/catalog')} iconRight={<Icon name="chevron-right" size={14} />}>Esplora il Catalogo</Button>}
             </div>
-            <div style={{ marginTop: 44, display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ display: 'flex' }}>
-                {[0, 1, 2, 3].map(i =>
-                  <span key={i} style={{ width: 30, height: 30, borderRadius: '50%', background: `hsl(${190 + i * 8}, 26%, ${68 - i * 8}%)`, border: '2px solid var(--bg-surface)', marginLeft: i ? -8 : 0 }} />
-                )}
-              </div>
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 500, color: 'var(--fg-primary)', letterSpacing: '-0.01em' }}>1.400+ contractor servono i propri clienti con CleanVillage</div>
-                <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 1, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ color: '#E5A302', letterSpacing: '1px' }}>★★★★★</span> 4,9 / 5 su Trustpilot · 312 recensioni
+            {!isMobile && (
+              <div style={{ marginTop: 44, display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ display: 'flex' }}>
+                  {[0, 1, 2, 3].map(i =>
+                    <span key={i} style={{ width: 30, height: 30, borderRadius: '50%', background: `hsl(${190 + i * 8}, 26%, ${68 - i * 8}%)`, border: '2px solid var(--bg-surface)', marginLeft: i ? -8 : 0 }} />
+                  )}
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 500, color: 'var(--fg-primary)', letterSpacing: '-0.01em' }}>1.400+ contractor servono i propri clienti con CleanVillage</div>
+                  <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 1, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ color: '#E5A302', letterSpacing: '1px' }}>★★★★★</span> 4,9 / 5 su Trustpilot · 312 recensioni
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-          <HeroVisual />
+          {!isMobile && <HeroVisual />}
         </div>
         {/* stat ribbon */}
-        <div style={{ marginTop: 56, padding: '32px 0', borderTop: '1px solid var(--border-subtle)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
+        <div style={{ marginTop: isMobile ? 36 : 56, padding: isMobile ? '24px 0' : '32px 0', borderTop: '1px solid var(--border-subtle)', display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? 20 : 32 }}>
           <Stat value="40" unit="anni" label="Attività ininterrotta" />
           <Stat value="500" unit="+" label="Codici a magazzino" />
           <Stat value="24" unit="h" label="Risposta preventivo" accent />
@@ -193,43 +197,58 @@ function BrandMarquee() {
 
 function CategoryShowcase({ tweaks }) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const cats = useCategories();
   const style = tweaks?.categoryStyle || 'magazine';
   return (
-    <section style={{ padding: '112px 32px 96px', background: 'var(--bg-page)' }}>
+    <section style={{ padding: isMobile ? '64px 20px 48px' : '112px 32px 96px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: 48, gap: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 28 : 48, gap: 24, flexWrap: 'wrap' }}>
           <div>
             <Eyebrow>Catalogo · 11 categorie · 571 SKU</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(36px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '20ch', lineHeight: 1.04 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '20ch', lineHeight: 1.04 }}>
               Tutto ciò che serve alla tua operazione.
             </h2>
           </div>
-          <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>Esplora il catalogo completo</Button>
+          {!isMobile && <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>Esplora il catalogo completo</Button>}
         </div>
 
         {style === 'magazine' && <>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 20 }}>
-            <CategoryTile cat={cats[0]} index={0} size="xl" onClick={() => navigate('/catalog')} style={{ gridRow: 'span 2' }} />
-            <CategoryTile cat={cats[1]} index={1} onClick={() => navigate('/catalog')} />
-            <CategoryTile cat={cats[2]} index={2} onClick={() => navigate('/catalog')} />
-            <CategoryTile cat={cats[3]} index={3} onClick={() => navigate('/catalog')} />
-            <CategoryTile cat={cats[4]} index={4} onClick={() => navigate('/catalog')} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14, marginTop: 20 }}>
-            {cats.slice(5).map(c => <CategoryPill key={c.id} cat={c} onClick={() => navigate('/catalog')} />)}
-          </div>
+          {isMobile ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              {cats.slice(0, 6).map((c, i) => <CategoryTile key={c.id} cat={c} index={i} onClick={() => navigate('/catalog')} />)}
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 20 }}>
+                <CategoryTile cat={cats[0]} index={0} size="xl" onClick={() => navigate('/catalog')} style={{ gridRow: 'span 2' }} />
+                <CategoryTile cat={cats[1]} index={1} onClick={() => navigate('/catalog')} />
+                <CategoryTile cat={cats[2]} index={2} onClick={() => navigate('/catalog')} />
+                <CategoryTile cat={cats[3]} index={3} onClick={() => navigate('/catalog')} />
+                <CategoryTile cat={cats[4]} index={4} onClick={() => navigate('/catalog')} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14, marginTop: 20 }}>
+                {cats.slice(5).map(c => <CategoryPill key={c.id} cat={c} onClick={() => navigate('/catalog')} />)}
+              </div>
+            </>
+          )}
         </>}
 
         {style === 'grid' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 18 }}>
             {cats.map((c, i) => <CategoryTile key={c.id} cat={c} index={i} onClick={() => navigate('/catalog')} />)}
           </div>
         )}
 
         {style === 'list' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
             {cats.map(c => <CategoryRow key={c.id} cat={c} onClick={() => navigate('/catalog')} />)}
+          </div>
+        )}
+
+        {isMobile && (
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
+            <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>Esplora il catalogo completo</Button>
           </div>
         )}
       </div>
@@ -340,14 +359,15 @@ function CategoryPill({ cat, onClick }) {
 
 function PromoStrip() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const promos = [
     { tag: 'PROMO −30%', title: 'Calzature Technosafe S3', subtitle: 'Su scorte selezionate · fino esaurimento', cta: 'Approfitta ora', kind: 'shoe', color: 'mint' },
     { tag: 'NOVITÀ 2026', title: 'COMAC Innova 100 B', subtitle: 'La nuova generazione uomo a bordo', cta: 'Scopri la macchina', kind: 'scrubber', color: 'teal' },
     { tag: 'BANCALE', title: 'Lucart EcoNatural — 24 conf.', subtitle: 'Carta tissue 100% riciclata', cta: 'Calcola il risparmio', kind: 'paper', color: 'teal' }
   ];
   return (
-    <section style={{ padding: '0 32px 0', background: 'var(--bg-page)', marginBottom: 96 }}>
-      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+    <section style={{ padding: isMobile ? '0 20px 0' : '0 32px 0', background: 'var(--bg-page)', marginBottom: isMobile ? 56 : 96 }}>
+      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16 }}>
         {promos.map((p, i) => <PromoCard key={i} promo={p} onClick={() => navigate('/catalog')} />)}
       </div>
     </section>
@@ -392,6 +412,7 @@ function PromoCard({ promo, onClick }) {
 
 function HighlightedMachines() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const machines = [
     {
       id: 'comac-innova', eyebrow: 'Punta di diamante · COMAC', name: 'Innova 100 B Uomo a Bordo',
@@ -416,29 +437,29 @@ function HighlightedMachines() {
     },
   ];
   return (
-    <section style={{ padding: '0 32px 112px', background: 'var(--bg-page)' }}>
+    <section style={{ padding: isMobile ? '0 20px 64px' : '0 32px 112px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: 48, gap: 24, paddingTop: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 32 : 48, gap: 24, paddingTop: 16, flexWrap: 'wrap' }}>
           <div>
             <Eyebrow>Macchine in evidenza · 3 modelli che contano</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(36px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
               I cavalli da lavoro che consigliamo a occhi chiusi.
             </h2>
           </div>
-          <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: 0, maxWidth: '40ch' }}>
+          {!isMobile && <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: 0, maxWidth: '40ch' }}>
             Tre macchine che vendiamo da anni, conosciamo nei dettagli e seguiamo dal service alla fornitura di ricambi. Sono il nostro punto di partenza quando ci chiedi una flotta.
-          </p>
+          </p>}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
-          {machines.map((m, i) => <HighlightedRow key={m.id} m={m} index={i + 1} navigate={navigate} />)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 40 : 64 }}>
+          {machines.map((m, i) => <HighlightedRow key={m.id} m={m} index={i + 1} navigate={navigate} isMobile={isMobile} />)}
         </div>
       </div>
     </section>
   );
 }
 
-function HighlightedRow({ m, index, navigate }) {
-  const reverse = m.side === 'right';
+function HighlightedRow({ m, index, navigate, isMobile }) {
+  const reverse = m.side === 'right' && !isMobile;
   const text = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18, padding: '24px 8px' }}>
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
@@ -502,7 +523,7 @@ function HighlightedRow({ m, index, navigate }) {
   );
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center', direction: reverse ? 'rtl' : 'ltr' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 24 : 64, alignItems: 'center', direction: reverse ? 'rtl' : 'ltr' }}>
       <div style={{ direction: 'ltr' }}>{reverse ? text : image}</div>
       <div style={{ direction: 'ltr' }}>{reverse ? image : text}</div>
     </div>
@@ -510,22 +531,23 @@ function HighlightedRow({ m, index, navigate }) {
 }
 
 function IndustriesGrid() {
+  const isMobile = useIsMobile();
   const items = useIndustries();
   return (
-    <section style={{ padding: '0 32px 96px', background: 'var(--bg-page)' }}>
+    <section style={{ padding: isMobile ? '0 20px 56px' : '0 32px 96px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 48, alignItems: 'end', marginBottom: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: isMobile ? 16 : 48, alignItems: 'end', marginBottom: isMobile ? 24 : 40 }}>
           <div>
             <Eyebrow>I settori che riforniamo</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(32px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.06 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.06 }}>
               Configurazioni e prezzi pensati per il tuo settore.
             </h2>
           </div>
-          <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: 0, maxWidth: '46ch' }}>
+          {!isMobile && <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: 0, maxWidth: '46ch' }}>
             Ogni settore ha esigenze diverse: macchine, certificazioni, listini, formati. Il nostro trade desk parte da chi sei e cosa fai, non da un catalogo generico.
-          </p>
+          </p>}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
           {items.map((ind, i) => <IndustryCard key={ind.id} ind={ind} index={i + 1} />)}
         </div>
       </div>
@@ -563,11 +585,12 @@ function IndustryCard({ ind, index }) {
 
 function VideoAziendale() {
   const [playing, setPlaying] = useState(false);
+  const isMobile = useIsMobile();
   return (
-    <section style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', padding: '112px 32px', position: 'relative' }}>
+    <section style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', padding: isMobile ? '64px 20px' : '112px 32px', position: 'relative' }}>
       <TrustBar height={3} />
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 64, alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.3fr', gap: isMobile ? 36 : 64, alignItems: 'center' }}>
           <div>
             <Eyebrow dark>Video aziendale</Eyebrow>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '-0.035em', margin: '18px 0 22px', textWrap: 'balance', color: 'var(--color-white)', lineHeight: 1.04 }}>
@@ -661,21 +684,22 @@ function VideoAziendale() {
 
 function FormazioneCorsi() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const courses = useCourses();
   return (
-    <section style={{ background: 'var(--bg-surface)', padding: '112px 32px', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
+    <section style={{ background: 'var(--bg-surface)', padding: isMobile ? '64px 20px' : '112px 32px', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 64, alignItems: 'end', marginBottom: 48 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 1fr', gap: isMobile ? 20 : 64, alignItems: 'end', marginBottom: isMobile ? 28 : 48 }}>
           <div>
             <Eyebrow>Accademia CleanVillage · dal 2018</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(36px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
               Formazione e corsi per chi lavora con le mani.
             </h2>
           </div>
           <div>
-            <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.65, margin: '0 0 18px', maxWidth: '46ch' }}>
+            {!isMobile && <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.65, margin: '0 0 18px', maxWidth: '46ch' }}>
               Una macchina vale quanto chi la guida. Da otto anni formiamo operatori, capi-squadra e responsabili acquisti su uso sicuro, manutenzione, sanificazione professionale e gare d'appalto. Corsi in aula a Busto Arsizio, in azienda da te o in modalità ibrida.
-            </p>
+            </p>}
             <div style={{ display: 'flex', gap: 18, marginTop: 18, flexWrap: 'wrap' }}>
               <FormStat value="42" label="Corsi erogati · 2025" />
               <FormStat value="1.860" label="Operatori formati" />
@@ -683,16 +707,16 @@ function FormazioneCorsi() {
             </div>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 20 }}>
           {courses.map((c, i) => <CourseCard key={c.id} c={c} index={i + 1} />)}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 40, paddingTop: 28, borderTop: '1px solid var(--border-subtle)', gap: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginTop: 40, paddingTop: 28, borderTop: '1px solid var(--border-subtle)', gap: 24, flexDirection: isMobile ? 'column' : 'row' }}>
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 18, letterSpacing: '-0.02em', color: 'var(--fg-primary)' }}>Hai bisogno di un corso su misura per la tua squadra?</div>
             <div style={{ fontSize: 13, color: 'var(--fg-secondary)', marginTop: 4 }}>Costruiamo programmi dedicati per imprese e plant industriali — minimo 6 partecipanti.</div>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Button variant="secondary" iconRight={<Icon name="download" size={14} />}>Brochure corsi 2026</Button>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {!isMobile && <Button variant="secondary" iconRight={<Icon name="download" size={14} />}>Brochure corsi 2026</Button>}
             <Button variant="cta" onClick={() => navigate('/contact')} iconRight={<Icon name="arrow-right" size={14} />}>Richiedi un corso</Button>
           </div>
         </div>
@@ -812,24 +836,30 @@ function CourseGraphic({ kind }) {
 
 function FeaturedProducts() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const allProducts = useProducts();
   const featuredOnly = allProducts.filter(p => p.is_featured);
-  const featured = (featuredOnly.length ? featuredOnly : allProducts).slice(0, 4);
+  const featured = (featuredOnly.length ? featuredOnly : allProducts).slice(0, isMobile ? 4 : 4);
   return (
-    <section style={{ padding: '112px 32px', background: 'var(--bg-page)' }}>
+    <section style={{ padding: isMobile ? '64px 20px' : '112px 32px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: 40, gap: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 24 : 40, gap: 24, flexWrap: 'wrap' }}>
           <div>
             <Eyebrow>In evidenza · spediti questa settimana</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(32px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '24ch' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '24ch' }}>
               Pronti a magazzino, in spedizione.
             </h2>
           </div>
-          <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>Vedi tutti gli articoli a stock</Button>
+          {!isMobile && <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>Vedi tutti gli articoli a stock</Button>}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? 14 : 20 }}>
           {featured.map(p => <ProductCard key={p.id} product={p} onClick={() => navigate(`/product/${p.id}`)} />)}
         </div>
+        {isMobile && (
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
+            <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>Vedi tutti gli articoli a stock</Button>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -837,10 +867,11 @@ function FeaturedProducts() {
 
 function QuoteCTA() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   return (
     <section style={{ background: 'var(--bg-inverse)', color: 'var(--color-white)', position: 'relative', overflow: 'hidden' }}>
       <TrustBar height={3} />
-      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '96px 32px', display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 64, alignItems: 'center' }}>
+      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '64px 20px' : '96px 32px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 32 : 64, alignItems: 'center' }}>
         <div>
           <Eyebrow dark>Pronti quando lo sei tu</Eyebrow>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(38px, 4.6vw, 56px)', letterSpacing: '-0.035em', color: 'var(--color-white)', margin: '18px 0 22px', textWrap: 'balance', lineHeight: 1.04 }}>

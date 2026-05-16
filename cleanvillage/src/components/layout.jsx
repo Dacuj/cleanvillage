@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logo, Icon, Button, TrustBar, Eyebrow } from './ui.jsx';
 import { CV_CATEGORIES, CV_BRANDS } from '../data.js';
+import { useIsMobile } from '../lib/useBreakpoint.js';
 
 const SOCIAL_SVGS = {
   linkedin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
@@ -58,9 +59,76 @@ function MegaBrands({ onClose }) {
   );
 }
 
+function MobileDrawer({ onClose }) {
+  const navigate = useNavigate();
+  const [section, setSection] = useState(null);
+  const go = (path) => { navigate(path); onClose(); };
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
+      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '85vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
+          <Logo size="md" />
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, color: 'var(--fg-secondary)' }}>
+            <Icon name="x" size={20} />
+          </button>
+        </div>
+        <div style={{ padding: '12px 0', flex: 1 }}>
+          <MobileNavItem label="Categorie" icon="grid" onToggle={() => setSection(s => s === 'cat' ? null : 'cat')} open={section === 'cat'}>
+            <div style={{ padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {CV_CATEGORIES.map(c => (
+                <button key={c.id} onClick={() => go('/catalog')} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
+                  <span style={{ width: 28, height: 28, display: 'grid', placeItems: 'center', background: 'var(--color-ice-50)', color: 'var(--color-teal-500)', borderRadius: 'var(--radius-xs)', flexShrink: 0 }}>
+                    <Icon name={c.icon} size={13} />
+                  </span>
+                  <span style={{ fontSize: 14, color: 'var(--fg-primary)', fontWeight: 400 }}>{c.label}</span>
+                </button>
+              ))}
+            </div>
+          </MobileNavItem>
+          <MobileNavItem label="Marchi" icon="tag" onToggle={() => setSection(s => s === 'brand' ? null : 'brand')} open={section === 'brand'}>
+            <div style={{ padding: '8px 20px 16px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {CV_BRANDS.map(b => (
+                <span key={b.name} style={{ padding: '6px 12px', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: b.weight || 500 }}>{b.name}</span>
+              ))}
+            </div>
+          </MobileNavItem>
+          <button onClick={() => go('/contact')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+            <Icon name="mail" size={18} /> Contatti
+          </button>
+          <button onClick={() => go('/')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+            <Icon name="play" size={18} /> Video Aziendale
+          </button>
+          <button onClick={() => go('/')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+            <Icon name="info" size={18} /> Azienda
+          </button>
+        </div>
+        <div style={{ padding: '16px 20px 32px', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Button variant="cta" onClick={() => go('/contact')} style={{ width: '100%', justifyContent: 'center' }}>Richiedi Preventivo</Button>
+          <div style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>+39 0331 555 220 · trade@cleanvillage.it</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function MobileNavItem({ label, icon, onToggle, open, children }) {
+  return (
+    <div style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      <button onClick={onToggle} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}><Icon name={icon} size={18} />{label}</span>
+        <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} />
+      </button>
+      {open && children}
+    </div>
+  );
+}
+
 export function Header() {
   const [open, setOpen] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const NAV = [
     { id: 'cat', label: 'Categorie', has: true },
@@ -72,71 +140,94 @@ export function Header() {
 
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(255,255,255,0.92)', borderBottom: '1px solid var(--border-subtle)', backdropFilter: 'blur(10px)' }}>
-      {/* utility strip */}
-      <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--color-ice-50)' }}>
-        <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '7px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="phone" size={11} /> +39 0331 555 220</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="mail" size={11} /> trade@cleanvillage.it</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="clock" size={11} /> Lun–Ven · 08:30–18:00</span>
-          </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18 }}>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>Condizioni di vendita</a>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>Condizioni di garanzia</a>
-            <Link to="/admin" style={{ color: 'var(--color-teal-500)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}><Icon name="lock" size={11} /> Area trade desk</Link>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="globe" size={11} /> IT</span>
-          </span>
+      {/* utility strip - desktop only */}
+      {!isMobile && (
+        <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--color-ice-50)' }}>
+          <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '7px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="phone" size={11} /> +39 0331 555 220</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="mail" size={11} /> trade@cleanvillage.it</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="clock" size={11} /> Lun–Ven · 08:30–18:00</span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18 }}>
+              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>Condizioni di vendita</a>
+              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>Condizioni di garanzia</a>
+              <Link to="/admin" style={{ color: 'var(--color-teal-500)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}><Icon name="lock" size={11} /> Area trade desk</Link>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="globe" size={11} /> IT</span>
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* main bar */}
-      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '0 32px', height: 72, display: 'flex', alignItems: 'center', gap: 32 }}>
+      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', height: isMobile ? 60 : 72, display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 32 }}>
         <Link to="/" style={{ textDecoration: 'none' }}><Logo size="md" /></Link>
 
-        <nav style={{ display: 'flex', gap: 4, alignItems: 'center', height: '100%', position: 'relative' }}
-          onMouseLeave={() => setOpen(null)}>
-          {NAV.map(n => (
-            <button key={n.id}
-              onMouseEnter={() => n.has ? setOpen(n.id) : setOpen(null)}
-              onClick={() => {
-                if (!n.has) {
-                  if (n.id === 'contact') navigate('/contact');
-                  else navigate('/');
-                }
-              }}
-              style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                padding: '0 14px', height: '100%',
-                fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500,
-                color: open === n.id ? 'var(--color-teal-500)' : 'var(--fg-primary)',
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-              }}>
-              {n.label}
-              {n.has && <Icon name="chevron-down" size={12} />}
-            </button>
-          ))}
-          {open === 'cat' && <MegaCategories onClose={() => setOpen(null)} />}
-          {open === 'brand' && <MegaBrands onClose={() => setOpen(null)} />}
-        </nav>
+        {!isMobile && (
+          <nav style={{ display: 'flex', gap: 4, alignItems: 'center', height: '100%', position: 'relative' }}
+            onMouseLeave={() => setOpen(null)}>
+            {NAV.map(n => (
+              <button key={n.id}
+                onMouseEnter={() => n.has ? setOpen(n.id) : setOpen(null)}
+                onClick={() => {
+                  if (!n.has) {
+                    if (n.id === 'contact') navigate('/contact');
+                    else navigate('/');
+                  }
+                }}
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  padding: '0 14px', height: '100%',
+                  fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500,
+                  color: open === n.id ? 'var(--color-teal-500)' : 'var(--fg-primary)',
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                }}>
+                {n.label}
+                {n.has && <Icon name="chevron-down" size={12} />}
+              </button>
+            ))}
+            {open === 'cat' && <MegaCategories onClose={() => setOpen(null)} />}
+            {open === 'brand' && <MegaBrands onClose={() => setOpen(null)} />}
+          </nav>
+        )}
 
         <span style={{ flex: 1 }} />
 
-        <div style={{ position: 'relative', width: 260 }}>
-          <Icon name="search" size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-muted)' }} />
-          <input placeholder="Cerca prodotti, codici, marchi…"
-            style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-50)', border: '1px solid transparent', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--fg-primary)' }} />
-        </div>
+        {!isMobile && (
+          <div style={{ position: 'relative', width: 260 }}>
+            <Icon name="search" size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-muted)' }} />
+            <input placeholder="Cerca prodotti, codici, marchi…"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-50)', border: '1px solid transparent', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--fg-primary)' }} />
+          </div>
+        )}
 
-        <button aria-label="Account" style={{ width: 36, height: 36, background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--fg-secondary)' }}>
-          <Icon name="user" size={16} />
-        </button>
-        <Button variant="cta" onClick={() => navigate('/contact')} iconRight={<Icon name="arrow-right" size={13} />}>Richiedi Preventivo</Button>
+        {!isMobile && (
+          <button aria-label="Account" style={{ width: 36, height: 36, background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--fg-secondary)' }}>
+            <Icon name="user" size={16} />
+          </button>
+        )}
+
+        {isMobile ? (
+          <>
+            <button onClick={() => navigate('/contact')} style={{ height: 40, padding: '0 14px', background: 'var(--cta-bg)', color: 'var(--color-white)', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              Preventivo
+            </button>
+            <button onClick={() => setDrawerOpen(true)} style={{ width: 40, height: 40, background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--fg-primary)', flexShrink: 0 }}>
+              <Icon name="menu" size={20} />
+            </button>
+          </>
+        ) : (
+          <Button variant="cta" onClick={() => navigate('/contact')} iconRight={<Icon name="arrow-right" size={13} />}>Richiedi Preventivo</Button>
+        )}
       </div>
+
+      {drawerOpen && <MobileDrawer onClose={() => setDrawerOpen(false)} />}
     </header>
   );
 }
 
 export function Footer() {
+  const isMobile = useIsMobile();
   const Col = ({ title, children }) => (
     <div>
       <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-300)', marginBottom: 18 }}>{title}</div>
@@ -149,9 +240,9 @@ export function Footer() {
   return (
     <footer style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', marginTop: 'auto', position: 'relative' }}>
       <TrustBar height={3} />
-      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '80px 32px 36px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr', gap: 40 }}>
-          <div>
+      <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '48px 20px 28px' : '80px 32px 36px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1.4fr 1fr 1fr 1fr 1fr', gap: isMobile ? 32 : 40 }}>
+          <div style={{ gridColumn: isMobile ? '1 / -1' : 'auto' }}>
             <Logo inverse size="lg" />
             <p style={{ marginTop: 18, fontSize: 14, color: 'var(--color-teal-100)', maxWidth: '34ch', lineHeight: 1.6, fontWeight: 400 }}>
               Macchinari per la pulizia industriale e forniture all'ingrosso. Al servizio di imprese e contractor in tutto il Nord Italia dal 1985.
@@ -179,21 +270,25 @@ export function Footer() {
             <Lk>Noleggio</Lk>
             <Lk>Formazione</Lk>
           </Col>
-          <Col title="Trade desk">
-            <Lk><Icon name="phone" size={12} /> +39 0331 555 220</Lk>
-            <Lk><Icon name="mail" size={12} /> trade@cleanvillage.it</Lk>
-            <Lk><Icon name="clock" size={12} /> Lun–Ven · 08:30–18:00</Lk>
-            <Lk><Icon name="truck" size={12} /> Spedizioni in tutta UE</Lk>
-          </Col>
-          <Col title="Sede operativa">
-            <Lk>Via dell'Industria 24</Lk>
-            <Lk>21052 Busto Arsizio (VA)</Lk>
-            <Lk>Italia</Lk>
-            <Lk><Icon name="map-pin" size={12} /> Indicazioni stradali</Lk>
-          </Col>
+          {!isMobile && (
+            <Col title="Trade desk">
+              <Lk><Icon name="phone" size={12} /> +39 0331 555 220</Lk>
+              <Lk><Icon name="mail" size={12} /> trade@cleanvillage.it</Lk>
+              <Lk><Icon name="clock" size={12} /> Lun–Ven · 08:30–18:00</Lk>
+              <Lk><Icon name="truck" size={12} /> Spedizioni in tutta UE</Lk>
+            </Col>
+          )}
+          {!isMobile && (
+            <Col title="Sede operativa">
+              <Lk>Via dell'Industria 24</Lk>
+              <Lk>21052 Busto Arsizio (VA)</Lk>
+              <Lk>Italia</Lk>
+              <Lk><Icon name="map-pin" size={12} /> Indicazioni stradali</Lk>
+            </Col>
+          )}
         </div>
-        <div style={{ marginTop: 52, paddingTop: 24, borderTop: '1px solid var(--color-teal-700)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-100)', opacity: 0.8, flexWrap: 'wrap', gap: 12 }}>
-          <span>© 2026 CleanVillage Srl · P.IVA 01234567891 · REA VA-345678 · Cap. soc. €100.000 i.v.</span>
+        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--color-teal-700)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-100)', opacity: 0.8, gap: 12 }}>
+          <span>© 2026 CleanVillage Srl · P.IVA 01234567891</span>
           <span style={{ display: 'inline-flex', gap: 18 }}>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>Cookie</a>

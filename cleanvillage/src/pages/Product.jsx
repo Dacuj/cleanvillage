@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Button, Eyebrow, Spec, StockPill } from '../components/ui.jsx';
 import { ProductIllustration, ProductCard } from '../components/product.jsx';
 import { listCategories, listProducts, getProduct } from '../lib/api.js';
+import { useIsMobile } from '../lib/useBreakpoint.js';
 
 export default function Product() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState(null);
   const [cats, setCats] = useState([]);
@@ -52,8 +54,8 @@ export default function Product() {
       </section>
 
       {/* Main product layout */}
-      <section style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '40px 32px 56px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 48 }}>
+      <section style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '24px 16px 48px' : '40px 32px 56px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: isMobile ? 28 : 48 }}>
           {/* Gallery */}
           <div>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', aspectRatio: '1/1', display: 'grid', placeItems: 'center', overflow: 'hidden', position: 'relative' }}>
