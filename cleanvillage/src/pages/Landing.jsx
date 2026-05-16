@@ -210,11 +210,11 @@ function CategoryShowcase({ tweaks }) {
 
         {style === 'magazine' && <>
           <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 20 }}>
-            <CategoryTile cat={cats[0]} size="xl" onClick={() => navigate('/catalog')} style={{ gridRow: 'span 2' }} />
-            <CategoryTile cat={cats[1]} onClick={() => navigate('/catalog')} />
-            <CategoryTile cat={cats[2]} onClick={() => navigate('/catalog')} />
-            <CategoryTile cat={cats[3]} onClick={() => navigate('/catalog')} />
-            <CategoryTile cat={cats[4]} onClick={() => navigate('/catalog')} />
+            <CategoryTile cat={cats[0]} index={0} size="xl" onClick={() => navigate('/catalog')} style={{ gridRow: 'span 2' }} />
+            <CategoryTile cat={cats[1]} index={1} onClick={() => navigate('/catalog')} />
+            <CategoryTile cat={cats[2]} index={2} onClick={() => navigate('/catalog')} />
+            <CategoryTile cat={cats[3]} index={3} onClick={() => navigate('/catalog')} />
+            <CategoryTile cat={cats[4]} index={4} onClick={() => navigate('/catalog')} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14, marginTop: 20 }}>
             {cats.slice(5).map(c => <CategoryPill key={c.id} cat={c} onClick={() => navigate('/catalog')} />)}
@@ -223,7 +223,7 @@ function CategoryShowcase({ tweaks }) {
 
         {style === 'grid' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18 }}>
-            {cats.map(c => <CategoryTile key={c.id} cat={c} onClick={() => navigate('/catalog')} />)}
+            {cats.map((c, i) => <CategoryTile key={c.id} cat={c} index={i} onClick={() => navigate('/catalog')} />)}
           </div>
         )}
 
@@ -259,7 +259,7 @@ function CategoryRow({ cat, onClick }) {
   );
 }
 
-function CategoryTile({ cat, size = 'md', onClick, style: extraStyle }) {
+function CategoryTile({ cat, index = 0, size = 'md', onClick, style: extraStyle }) {
   const [hover, setHover] = useState(false);
   const big = size === 'xl';
   if (!cat) return null;
@@ -283,7 +283,7 @@ function CategoryTile({ cat, size = 'md', onClick, style: extraStyle }) {
         </div>
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 500, color: 'var(--fg-muted)', letterSpacing: '0.04em' }}>{String(cats.indexOf(cat) + 1).padStart(2, '0')}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 500, color: 'var(--fg-muted)', letterSpacing: '0.04em' }}>{String(index + 1).padStart(2, '0')}</div>
             <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: big ? 38 : 22, letterSpacing: '-0.03em', margin: '8px 0 0', lineHeight: 1.06, color: 'var(--fg-primary)', maxWidth: big ? '14ch' : '18ch' }}>
               {cat.label}
             </h3>
