@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
+import { useAuth } from '../lib/auth.jsx';
+import { isSupabaseConfigured } from '../lib/supabase.js';
 
 /* ============================================================
    ICON helper
@@ -113,16 +115,30 @@ function AdminSidebar({ page }) {
           </div>
         ))}
       </nav>
-      {/* Footer user card */}
-      <div style={{ padding: '14px 14px', borderTop: '1px solid var(--color-teal-700)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--color-mint-500)', color: 'var(--color-white)', display: 'grid', placeItems: 'center', fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 14, flexShrink: 0 }}>MR</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-white)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Marco Rossi</div>
-          <div style={{ fontSize: 10, color: 'var(--color-teal-100)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Admin · Trade desk</div>
-        </div>
-        <AdminIcon name="log-out" size={14} color="var(--color-teal-100)" />
-      </div>
+      <SidebarUserCard />
     </aside>
+  );
+}
+
+function SidebarUserCard() {
+  const { user, signOut } = useAuth();
+  const email = user?.email || 'demo@cleanvillage.it';
+  const initials = (email[0] + (email.split('@')[0].split('.')[1]?.[0] || email[1] || '')).toUpperCase();
+  const label = user?.email?.split('@')[0] || 'Modalità demo';
+  const role = isSupabaseConfigured ? (user ? 'Admin · loggato' : 'Demo · non loggato') : 'Demo · senza DB';
+  return (
+    <div style={{ padding: '14px 14px', borderTop: '1px solid var(--color-teal-700)', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--color-mint-500)', color: 'var(--color-white)', display: 'grid', placeItems: 'center', fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 14, flexShrink: 0 }}>{initials}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-white)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
+        <div style={{ fontSize: 10, color: 'var(--color-teal-100)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{role}</div>
+      </div>
+      {user && (
+        <button onClick={signOut} title="Esci" style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', padding: 6 }}>
+          <AdminIcon name="log-out" size={14} color="var(--color-teal-100)" />
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -1,23 +1,30 @@
 import { useState, useEffect } from 'react';
 import { AdminPage, AdminIcon, ABtn, Badge, Panel, Modal, AField, AInput, ATextarea, ASelect, DataTable } from './chrome.jsx';
-import { CV_LANDING_VIDEOS, CV_PRODUCTS } from '../data.js';
+import { listVideos, upsertVideo, deleteVideo, listProducts } from '../lib/api.js';
+import { isSupabaseConfigured } from '../lib/supabase.js';
 
 export default function AdminVideos() {
-  const [items, setItems] = useState(CV_LANDING_VIDEOS);
+  const [items, setItems] = useState([]);
+  const [products, setProducts] = useState([]);
   const [editing, setEditing] = useState(null);
   const [uploadProg, setUploadProg] = useState(0);
 
-  const handleSave = (data, isNew) => {
-    if (isNew) {
-      setItems([{ id: `vid-${Date.now()}`, ...data }, ...items]);
-    } else {
-      setItems(items.map(v => v.id === data.id ? data : v));
-    }
-    setEditing(null);
+  const reload = async () => {
+    const [v, p] = await Promise.all([listVideos(), listProducts()]);
+    setItems(v); setProducts(p);
   };
-  const handleDelete = (id) => { setItems(items.filter(v => v.id !== id)); setEditing(null); };
+  useEffect(() => { reload(); }, []);
 
-  // Mock upload progress when modal opens with 'new'
+  const handleSave = async (data, isNew) => {
+    if (!isSupabaseConfigured) { alert('Configura Supabase.'); return; }
+    if (isNew && !data.id) data.id = `vid-${Date.now().toString(36)}`;
+    await upsertVideo(data); setEditing(null); reload();
+  };
+  const handleDelete = async (id) => {
+    if (!confirm('Eliminare il video?')) return;
+    await deleteVideo(id); setEditing(null); reload();
+  };
+
   useEffect(() => {
     if (editing === 'new') {
       setUploadProg(0);
@@ -107,6 +114,7 @@ export default function AdminVideos() {
       <VideoModal
         open={editing !== null}
         video={editing === 'new' ? null : editing}
+        products={products}
         onClose={() => setEditing(null)}
         onSave={handleSave}
         onDelete={handleDelete}
@@ -132,13 +140,13 @@ function VideoThumb({ video }) {
   );
 }
 
-function VideoModal({ open, video, onClose, onSave, onDelete, uploadProg }) {
+function VideoModal({ open, video, products = [], onClose, onSave, onDelete, uploadProg }) {
   const isNew = !video;
   const [form, setForm] = useState({
     id: video?.id, title: video?.title || '', spot: video?.spot || 'Hero · Video Aziendale',
     duration: video?.duration || '', status: video?.status || 'draft',
     date: video?.date || '16.05.2026', size: video?.size || '— MB',
-    description: video?.description || '',
+    description: video?.description || '', product_id: video?.product_id || '',
   });
 
   useEffect(() => {
@@ -147,7 +155,7 @@ function VideoModal({ open, video, onClose, onSave, onDelete, uploadProg }) {
         id: video?.id, title: video?.title || '', spot: video?.spot || 'Hero · Video Aziendale',
         duration: video?.duration || '', status: video?.status || 'draft',
         date: video?.date || '16.05.2026', size: video?.size || '— MB',
-        description: video?.description || '',
+        description: video?.description || '', product_id: video?.product_id || '',
       });
     }
   }, [open, video]);
@@ -231,8 +239,9 @@ function VideoModal({ open, video, onClose, onSave, onDelete, uploadProg }) {
           </AField>
           {form.spot === 'Pagina prodotto' && (
             <AField label="Prodotto associato" hint="Cerca per nome o SKU">
-              <ASelect>
-                {CV_PRODUCTS.map(p => <option key={p.id} value={p.id}>{p.brand} · {p.name} ({p.sku})</option>)}
+              <ASelect value={form.product_id || ''} onChange={e => setForm({ ...form, product_id: e.target.value })}>
+                <option value="">— Nessuno —</option>
+                {products.map(p => <option key={p.id} value={p.id}>{p.brand} · {p.name} ({p.sku})</option>)}
               </ASelect>
             </AField>
           )}

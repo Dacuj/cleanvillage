@@ -1,20 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Button, Eyebrow, Spec, StockPill } from '../components/ui.jsx';
 import { ProductIllustration, ProductCard } from '../components/product.jsx';
-import { CV_PRODUCTS, CV_CATEGORIES } from '../data.js';
+import { listCategories, listProducts, getProduct } from '../lib/api.js';
 
 export default function Product() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const products = CV_PRODUCTS;
-  const product = products.find(p => p.id === id) || products[0];
-  const cat = CV_CATEGORIES.find(c => c.id === product.catId) || CV_CATEGORIES[0];
+  const [products, setProducts] = useState([]);
+  const [product, setProduct] = useState(null);
+  const [cats, setCats] = useState([]);
   const [tab, setTab] = useState('specs');
   const [qty, setQty] = useState(1);
   const [view, setView] = useState(0);
 
-  const basePrice = parseInt(product.price.replace(/[^\d]/g, ''));
+  useEffect(() => {
+    Promise.all([listCategories(), listProducts(), getProduct(id)]).then(([c, p, single]) => {
+      setCats(c); setProducts(p); setProduct(single || p[0] || null); setView(0);
+    }).catch(console.error);
+  }, [id]);
+
+  if (!product) {
+    return <main style={{ background: 'var(--bg-page)', minHeight: 400, display: 'grid', placeItems: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg-muted)' }}>Caricamento prodotto…</main>;
+  }
+  const cat = cats.find(c => c.id === product.catId) || cats[0] || { label: 'Catalogo' };
+  const gallery = product.images && product.images.length ? product.images : [];
+  const galleryCount = Math.max(gallery.length, 1);
+  const basePrice = parseInt((product.price || '0').replace(/[^\d]/g, '')) || 0;
   const tiers = [
     { qty: '1–2', price: product.price, save: '—' },
     { qty: '3–9', price: `€${(basePrice * 0.93).toLocaleString('it-IT', { maximumFractionDigits: 0 })}`, save: '−7%' },
@@ -22,7 +34,7 @@ export default function Product() {
     { qty: '25+', price: 'A preventivo', save: 'Custom' },
   ];
 
-  const related = products.filter(p => p.catId === product.catId && p.id !== product.id).slice(0, 4);
+  const related = products.filter(p => p.catId === product?.catId && p.id !== product?.id).slice(0, 4);
 
   return (
     <main style={{ background: 'var(--bg-page)' }}>
@@ -45,36 +57,44 @@ export default function Product() {
           {/* Gallery */}
           <div>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', aspectRatio: '1/1', display: 'grid', placeItems: 'center', overflow: 'hidden', position: 'relative' }}>
-              <div style={{ width: '68%' }}><ProductIllustration kind={product.kind} hover={false} /></div>
+              {gallery.length > 0 ? (
+                <img src={gallery[view]?.url} alt={gallery[view]?.alt || product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 32 }} />
+              ) : (
+                <div style={{ width: '68%' }}><ProductIllustration kind={product.kind} hover={false} /></div>
+              )}
               {product.badge && (
                 <div style={{ position: 'absolute', top: 20, left: 20, padding: '5px 11px', background: 'var(--color-mint-500)', color: 'var(--color-white)', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 'var(--radius-xs)', boxShadow: 'var(--shadow-cta)' }}>
                   {product.badge}
                 </div>
               )}
               <div style={{ position: 'absolute', bottom: 20, right: 20, padding: '5px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', borderRadius: 'var(--radius-xs)' }}>
-                {view + 1} / 6
+                {view + 1} / {galleryCount}
               </div>
-              <button style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%)', width: 40, height: 40, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '50%', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: 'var(--shadow-card)' }}
-                onClick={() => setView((view + 1) % 6)}>
-                <Icon name="chevron-right" size={16} />
-              </button>
-              <button style={{ position: 'absolute', top: '50%', left: 20, transform: 'translateY(-50%)', width: 40, height: 40, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '50%', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: 'var(--shadow-card)' }}
-                onClick={() => setView((view + 5) % 6)}>
-                <Icon name="chevron-left" size={16} />
-              </button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10, marginTop: 14 }}>
-              {[0, 1, 2, 3, 4, 5].map(i => (
-                <button key={i} onClick={() => setView(i)} style={{
-                  aspectRatio: '1/1', background: 'var(--bg-surface)', cursor: 'pointer',
-                  border: `1px solid ${view === i ? 'var(--color-teal-500)' : 'var(--border-subtle)'}`,
-                  borderRadius: 'var(--radius-sm)', display: 'grid', placeItems: 'center', padding: 6,
-                  opacity: view === i ? 1 : 0.65, transition: 'all var(--motion-fast)',
-                }}>
-                  <div style={{ width: '85%' }}><ProductIllustration kind={product.kind} hover={false} /></div>
+              {galleryCount > 1 && <>
+                <button style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%)', width: 40, height: 40, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '50%', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: 'var(--shadow-card)' }}
+                  onClick={() => setView((view + 1) % galleryCount)}>
+                  <Icon name="chevron-right" size={16} />
                 </button>
-              ))}
+                <button style={{ position: 'absolute', top: '50%', left: 20, transform: 'translateY(-50%)', width: 40, height: 40, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '50%', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: 'var(--shadow-card)' }}
+                  onClick={() => setView((view + galleryCount - 1) % galleryCount)}>
+                  <Icon name="chevron-left" size={16} />
+                </button>
+              </>}
             </div>
+            {gallery.length > 1 && (
+              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(gallery.length, 6)}, 1fr)`, gap: 10, marginTop: 14 }}>
+                {gallery.slice(0, 6).map((img, i) => (
+                  <button key={img.id || i} onClick={() => setView(i)} style={{
+                    aspectRatio: '1/1', background: 'var(--bg-surface)', cursor: 'pointer',
+                    border: `1px solid ${view === i ? 'var(--color-teal-500)' : 'var(--border-subtle)'}`,
+                    borderRadius: 'var(--radius-sm)', display: 'grid', placeItems: 'center', padding: 6, overflow: 'hidden',
+                    opacity: view === i ? 1 : 0.65, transition: 'all var(--motion-fast)',
+                  }}>
+                    <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Documents row */}
             <div style={{ marginTop: 32, padding: '18px 22px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
@@ -110,12 +130,12 @@ export default function Product() {
               {product.name}
             </h1>
             <p style={{ margin: '0 0 24px', color: 'var(--fg-secondary)', fontSize: 15, lineHeight: 1.6 }}>
-              Macchina compatta a uomo a bordo per superfici da 800 a 4.000 m². Serbatoio in polietilene rotostampato, gruppo aspirante a 3 stadi, programmazione touch — pronta per appalti e contesti industriali pesanti.
+              {product.description || 'Macchina compatta a uomo a bordo per superfici da 800 a 4.000 m². Serbatoio in polietilene rotostampato, gruppo aspirante a 3 stadi, programmazione touch — pronta per appalti e contesti industriali pesanti.'}
             </p>
 
             {/* Spec chips */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
-              {product.specs.map((s, i) => <Spec key={i}>{s}</Spec>)}
+              {(product.specs || []).map((s, i) => <Spec key={i}>{s}</Spec>)}
               <Spec>Garanzia 24 mesi</Spec>
               <Spec>CE · Made in Italy</Spec>
             </div>

@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, Button, Eyebrow } from '../components/ui.jsx';
 import { inputStyle, Check } from '../components/fields.jsx';
 import { ProductCard } from '../components/product.jsx';
-import { CV_CATEGORIES, CV_PRODUCTS } from '../data.js';
+import { listCategories, listProducts } from '../lib/api.js';
 
 export default function Catalog() {
   const navigate = useNavigate();
@@ -12,9 +12,14 @@ export default function Catalog() {
   const [sort, setSort] = useState('relevance');
   const [search, setSearch] = useState('');
   const [view, setView] = useState('grid');
+  const [cats, setCats] = useState([]);
+  const [products, setProducts] = useState([]);
 
-  const cats = CV_CATEGORIES;
-  const products = CV_PRODUCTS;
+  useEffect(() => {
+    Promise.all([listCategories(), listProducts()]).then(([c, p]) => {
+      setCats(c); setProducts(p);
+    }).catch(console.error);
+  }, []);
 
   const filtered = useMemo(() => {
     let r = products;

@@ -1,29 +1,50 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminPage, AdminIcon, ABtn, Badge, Panel, DataTable } from './chrome.jsx';
-import { CV_PRODUCTS, CV_CATEGORIES } from '../data.js';
+import { listProducts, listCategories, listQuotes } from '../lib/api.js';
+
+const QUOTE_STATUS = {
+  new: { label: 'Da rispondere', tone: 'amber' },
+  contacted: { label: 'In trattativa', tone: 'teal' },
+  quoted: { label: 'Inviato', tone: 'mint' },
+  won: { label: 'Accettato', tone: 'mint' },
+  lost: { label: 'Perso', tone: 'neutral' },
+};
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const products = CV_PRODUCTS;
-  const categories = CV_CATEGORIES;
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [quotes, setQuotes] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const [p, c, q] = await Promise.all([listProducts(), listCategories(), listQuotes()]);
+      setProducts(p); setCategories(c); setQuotes(q);
+    })().catch(console.error);
+  }, []);
+
+  const skuCount = products.length;
+  const newQuotes = quotes.filter(q => q.status === 'new').length;
+  const inProgress = quotes.filter(q => q.status === 'contacted' || q.status === 'quoted').length;
+  const recent = quotes.slice(0, 5);
+  const greeting = `${quotes.length === 0 ? 'Tutto pronto.' : `Hai ${newQuotes} preventiv${newQuotes === 1 ? 'o' : 'i'} da prendere in carico.`} ${skuCount} SKU nel catalogo.`;
 
   return (
     <AdminPage
-      eyebrow="Console interna · 16 maggio 2026"
-      title="Buongiorno Marco."
-      subtitle="Hai 4 preventivi che aspettano una risposta e 12 ordini da spedire entro venerdì. Tutto sotto controllo."
+      eyebrow={`Console interna · ${new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+      title="Buongiorno."
+      subtitle={greeting}
       actions={[
         <ABtn key="r" variant="secondary" icon={<AdminIcon name="download" size={13} />}>Esporta report</ABtn>,
         <ABtn key="n" variant="cta" icon={<AdminIcon name="plus" size={13} />} onClick={() => navigate('/admin/products')}>Nuovo prodotto</ABtn>,
       ]}
     >
-      {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
-        <KPI title="SKU attivi" value="571" trend="+12 ultimi 30 gg" tone="teal" icon="package" />
-        <KPI title="Ordini aperti" value="42" trend="12 in spedizione" tone="mint" icon="shopping-bag" />
-        <KPI title="Preventivi" value="18" trend="4 in attesa" tone="amber" icon="file-text" />
-        <KPI title="Fatturato MTD" value="€312k" trend="+8,2% vs mag '25" tone="teal" icon="trending-up" />
+        <KPI title="SKU attivi" value={skuCount} trend={`${categories.length} categorie`} tone="teal" icon="package" />
+        <KPI title="Categorie" value={categories.length} trend="Catalogo organizzato" tone="mint" icon="folder-tree" />
+        <KPI title="Preventivi totali" value={quotes.length} trend={`${newQuotes} nuovi · ${inProgress} attivi`} tone="amber" icon="file-text" />
+        <KPI title="In evidenza" value={products.filter(p => p.is_highlighted).length} trend="Macchine in evidenza" tone="teal" icon="star" />
       </div>
 
       {/* 2 column area */}
@@ -33,21 +54,17 @@ export default function AdminDashboard() {
           <a href="#" onClick={e => { e.preventDefault(); navigate('/admin/quotes'); }} style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-teal-500)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>Vedi tutti <AdminIcon name="arrow-right" size={12} /></a>
         }>
           <DataTable
+            empty={quotes.length === 0 ? 'Nessun preventivo ricevuto.' : 'Nessun preventivo recente.'}
+            onRowClick={() => navigate('/admin/quotes')}
             columns={[
-              { key: 'ref', label: 'Riferimento', render: r => <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-teal-500)', fontWeight: 500 }}>{r.ref}</span> },
-              { key: 'co', label: 'Azienda' },
-              { key: 'cat', label: 'Categoria' },
-              { key: 'amt', label: 'Importo stim.', align: 'right', render: r => <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{r.amt}</span> },
-              { key: 'st', label: 'Stato', render: r => <Badge tone={r.stTone}>{r.st}</Badge> },
-              { key: 'd', label: 'Data', render: r => <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>{r.d}</span> },
+              { key: 'ref', label: 'ID', render: r => <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-500)' }}>{r.id.slice(0, 8)}</span> },
+              { key: 'co', label: 'Azienda', render: r => r.company || '—' },
+              { key: 'name', label: 'Contatto', render: r => <span style={{ fontSize: 12, color: 'var(--fg-secondary)' }}>{r.contact_name}</span> },
+              { key: 'tl', label: 'Tempistica', render: r => <span style={{ fontSize: 12 }}>{r.timeline || '—'}</span> },
+              { key: 'st', label: 'Stato', render: r => <Badge tone={QUOTE_STATUS[r.status]?.tone || 'neutral'}>{QUOTE_STATUS[r.status]?.label || r.status}</Badge> },
+              { key: 'd', label: 'Data', render: r => <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>{new Date(r.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}</span> },
             ]}
-            rows={[
-              { id: 1, ref: 'CV-2026-04472', co: 'Servizi Industriali Lombardi', cat: 'Lavasciuga', amt: '€56.400', st: 'Da rispondere', stTone: 'amber', d: 'oggi' },
-              { id: 2, ref: 'CV-2026-04471', co: 'Multiservizi Veneto', cat: 'Detergenti', amt: '€8.200', st: 'In trattativa', stTone: 'teal', d: 'oggi' },
-              { id: 3, ref: 'CV-2026-04470', co: 'Pulinet Brescia', cat: 'Carrelli', amt: '€2.840', st: 'Inviato', stTone: 'mint', d: 'ieri' },
-              { id: 4, ref: 'CV-2026-04469', co: 'Logistica Po Sud', cat: 'Idropulitrici', amt: '€18.900', st: 'Da rispondere', stTone: 'amber', d: 'ieri' },
-              { id: 5, ref: 'CV-2026-04468', co: 'GDO Center Italia', cat: 'Carta', amt: '€44.100', st: 'Accettato', stTone: 'mint', d: '14 mag' },
-            ]}
+            rows={recent}
           />
         </Panel>
 
@@ -55,12 +72,14 @@ export default function AdminDashboard() {
         <Panel title="Catalogo · stato per categoria" padding={20}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {categories.slice(0, 8).map(c => {
-              const pct = Math.min(100, Math.round((c.count / 215) * 100));
+              const actualCount = products.filter(p => p.catId === c.id).length;
+              const maxCount = Math.max(1, ...categories.map(x => products.filter(p => p.catId === x.id).length));
+              const pct = Math.min(100, Math.round((actualCount / maxCount) * 100));
               return (
                 <div key={c.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
                     <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--fg-primary)' }}>{c.label}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>{c.count} SKU</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>{actualCount} SKU</span>
                   </div>
                   <div style={{ height: 6, background: 'var(--color-ice-100)', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: 'var(--color-teal-500)', borderRadius: 3, transition: 'width 200ms' }} />

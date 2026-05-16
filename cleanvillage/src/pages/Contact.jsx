@@ -2,17 +2,48 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, Button, Eyebrow } from '../components/ui.jsx';
 import { Field, TextInput, Textarea, Select, Check } from '../components/fields.jsx';
-import { CV_CATEGORIES, CV_INDUSTRIES } from '../data.js';
+import { useCategories, useIndustries } from '../lib/storefront.js';
+import { createQuote } from '../lib/api.js';
+
+const TIMELINE_LABELS = {
+  urgent: 'Urgente · entro 7 gg',
+  '1-month': 'Entro 30 giorni',
+  'q-end': 'Entro fine trimestre',
+  planning: 'In pianificazione',
+};
 
 export default function Contact() {
   const navigate = useNavigate();
+  const CV_CATEGORIES = useCategories();
+  const CV_INDUSTRIES = useIndustries();
   const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
   const [form, setForm] = useState({
     company: '', vat: '', name: '', role: '', email: '', phone: '',
     category: 'lavasciuga', message: '', quantity: '1-5', timeline: '1-month', sector: 'imprese',
     privacy: false, newsletter: false,
   });
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setErr(''); setBusy(true);
+    try {
+      await createQuote({
+        company: form.company, vat: form.vat,
+        contact_name: form.name, email: form.email, phone: form.phone,
+        message: form.message,
+        needs: [form.category, `Quantità: ${form.quantity}`, `Settore: ${form.sector}`, form.role].filter(Boolean),
+        timeline: TIMELINE_LABELS[form.timeline] || form.timeline,
+      });
+      setSubmitted(true);
+    } catch (e) {
+      setErr(e.message || 'Errore invio. Riprova.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   if (submitted) return <ContactSuccess onReset={() => setSubmitted(false)} onNav={() => navigate('/catalog')} />;
 
@@ -46,7 +77,7 @@ export default function Contact() {
 
       <section style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '56px 32px 96px', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 40, alignItems: 'start' }}>
         {/* Form */}
-        <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+        <form onSubmit={onSubmit}
           style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '36px 36px 32px' }}>
 
           <FormSection title="La tua azienda" step={1}>
@@ -121,12 +152,17 @@ export default function Contact() {
             </div>
           </FormSection>
 
+          {err && (
+            <div style={{ marginTop: 18, padding: 12, background: '#FDEEEE', border: '1px solid #E89E9E', borderRadius: 'var(--radius-sm)', fontSize: 13, color: '#A02020' }}>
+              {err}
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 24, borderTop: '1px solid var(--border-subtle)', gap: 16 }}>
             <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', maxWidth: '38ch', lineHeight: 1.5 }}>
               Inviando confermi le nostre condizioni di vendita. Risposta entro 1 giorno lavorativo.
             </span>
-            <Button variant="cta" size="lg" type="submit" iconRight={<Icon name="arrow-right" size={14} />}>
-              Invia la richiesta
+            <Button variant="cta" size="lg" type="submit" disabled={busy} iconRight={<Icon name="arrow-right" size={14} />}>
+              {busy ? 'Invio in corso…' : 'Invia la richiesta'}
             </Button>
           </div>
         </form>

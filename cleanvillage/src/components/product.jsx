@@ -138,7 +138,15 @@ export function ProductCard({ product, onClick, dense = false }) {
         display: 'flex', flexDirection: 'column', height: '100%',
       }}>
         <div style={{ aspectRatio: dense ? '4/3' : '5/4', position: 'relative', background: '#FFFFFF', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-          <ProductIllustration kind={product.kind} hover={hover} />
+          {product.images && product.images.length > 0 ? (
+            <img
+              src={product.images[0].url}
+              alt={product.images[0].alt || product.name}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 12, transition: 'transform var(--motion-base)', transform: hover ? 'scale(1.04)' : 'scale(1)' }}
+            />
+          ) : (
+            <ProductIllustration kind={product.kind} hover={hover} />
+          )}
           <div style={{ position: 'absolute', top: 12, left: 12 }}>
             <StockPill status={product.stock} count={product.count} />
           </div>
@@ -155,7 +163,7 @@ export function ProductCard({ product, onClick, dense = false }) {
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: dense ? 16 : 17, letterSpacing: '-0.02em', color: 'var(--fg-primary)', lineHeight: 1.22 }}>{product.name}</span>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '4px 0 10px' }}>
-            {product.specs.slice(0, dense ? 2 : 3).map((s, i) => <Spec key={i}>{s}</Spec>)}
+            {(product.specs || []).slice(0, dense ? 2 : 3).map((s, i) => <Spec key={i}>{s}</Spec>)}
           </div>
           <div style={{ display: 'flex', alignItems: 'end', justifyContent: 'space-between', gap: 8, marginTop: 'auto' }}>
             <div>

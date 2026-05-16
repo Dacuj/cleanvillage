@@ -4,7 +4,7 @@ import { Icon, Button, TrustBar, Eyebrow, Spec } from '../components/ui.jsx';
 import { ProductCard, ProductIllustration } from '../components/product.jsx';
 import { ImageSlot } from '../components/ImageSlot.jsx';
 import { TweaksContext } from '../components/TweaksPanel.jsx';
-import { CV_CATEGORIES, CV_BRANDS, CV_PRODUCTS, CV_COURSES, CV_INDUSTRIES } from '../data.js';
+import { useCategories, useBrands, useProducts, useCourses, useIndustries } from '../lib/storefront.js';
 
 export default function Landing() {
   const tweaks = useContext(TweaksContext) || {};
@@ -169,7 +169,7 @@ function HeroVisual() {
 }
 
 function BrandMarquee() {
-  const brands = CV_BRANDS;
+  const brands = useBrands();
   const items = [...brands, ...brands];
   return (
     <section style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)', padding: '28px 0 32px', marginTop: 48 }}>
@@ -193,7 +193,7 @@ function BrandMarquee() {
 
 function CategoryShowcase({ tweaks }) {
   const navigate = useNavigate();
-  const cats = CV_CATEGORIES;
+  const cats = useCategories();
   const style = tweaks?.categoryStyle || 'magazine';
   return (
     <section style={{ padding: '112px 32px 96px', background: 'var(--bg-page)' }}>
@@ -281,7 +281,7 @@ function CategoryTile({ cat, size = 'md', onClick, style: extraStyle }) {
         </div>
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 500, color: 'var(--fg-muted)', letterSpacing: '0.04em' }}>0{CV_CATEGORIES.indexOf(cat) + 1}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 500, color: 'var(--fg-muted)', letterSpacing: '0.04em' }}>{String(cats.indexOf(cat) + 1).padStart(2, '0')}</div>
             <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: big ? 38 : 22, letterSpacing: '-0.03em', margin: '8px 0 0', lineHeight: 1.06, color: 'var(--fg-primary)', maxWidth: big ? '14ch' : '18ch' }}>
               {cat.label}
             </h3>
@@ -507,7 +507,7 @@ function HighlightedRow({ m, index, navigate }) {
 }
 
 function IndustriesGrid() {
-  const items = CV_INDUSTRIES;
+  const items = useIndustries();
   return (
     <section style={{ padding: '0 32px 96px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
@@ -658,7 +658,7 @@ function VideoAziendale() {
 
 function FormazioneCorsi() {
   const navigate = useNavigate();
-  const courses = CV_COURSES;
+  const courses = useCourses();
   return (
     <section style={{ background: 'var(--bg-surface)', padding: '112px 32px', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
@@ -809,7 +809,9 @@ function CourseGraphic({ kind }) {
 
 function FeaturedProducts() {
   const navigate = useNavigate();
-  const featured = CV_PRODUCTS.slice(0, 4);
+  const allProducts = useProducts();
+  const featuredOnly = allProducts.filter(p => p.is_featured);
+  const featured = (featuredOnly.length ? featuredOnly : allProducts).slice(0, 4);
   return (
     <section style={{ padding: '112px 32px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
