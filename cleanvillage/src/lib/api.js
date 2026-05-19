@@ -353,14 +353,16 @@ export async function probeSiteContentSetup() {
       raw: e.message,
     };
   }
+  // Use list() instead of getBucket() — getBucket() requires service role key,
+  // list() works with the anon key via the public read policy.
   try {
-    const { data: bucket, error: bucketErr } = await supabase.storage.getBucket('landing-images');
-    if (bucketErr || !bucket) {
+    const { error: listErr } = await supabase.storage.from('landing-images').list('', { limit: 1 });
+    if (listErr) {
       return {
         ok: false,
         stage: 'bucket',
         message: 'Bucket `landing-images` non trovato. Lo crea la migration 0002_site_content.sql.',
-        raw: bucketErr?.message,
+        raw: listErr.message,
       };
     }
   } catch (e) {
