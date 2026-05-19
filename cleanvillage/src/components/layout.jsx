@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Logo, Icon, Button, TrustBar, Eyebrow } from './ui.jsx';
 import { CV_CATEGORIES, CV_BRANDS } from '../data.js';
 import { useIsMobile } from '../lib/useBreakpoint.js';
+import { useSiteContent, buildDirectionsUrl } from '../lib/siteContent.js';
 
 const SOCIAL_SVGS = {
   linkedin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
@@ -61,16 +62,17 @@ function MegaBrands({ onClose }) {
 
 function MobileDrawer({ onClose }) {
   const navigate = useNavigate();
+  const content = useSiteContent();
   const [section, setSection] = useState(null);
   const go = (path) => { navigate(path); onClose(); };
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
-      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '85vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '88vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
           <Logo size="md" />
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, color: 'var(--fg-secondary)' }}>
-            <Icon name="x" size={20} />
+          <button onClick={onClose} aria-label="Chiudi menu" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, color: 'var(--fg-secondary)' }}>
+            <Icon name="x" size={22} />
           </button>
         </div>
         <div style={{ padding: '12px 0', flex: 1 }}>
@@ -104,8 +106,10 @@ function MobileDrawer({ onClose }) {
           </button>
         </div>
         <div style={{ padding: '16px 20px 32px', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Button variant="cta" onClick={() => go('/contact')} style={{ width: '100%', justifyContent: 'center' }}>Richiedi Preventivo</Button>
-          <div style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>+39 0331 555 220 · trade@cleanvillage.it</div>
+          <Button variant="cta" onClick={() => go('/contact')} full>Richiedi Preventivo</Button>
+          <div style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', lineHeight: 1.5 }}>
+            {content.company.phonePrimary} · {content.company.emailPrimary}
+          </div>
         </div>
       </div>
     </>
@@ -129,6 +133,7 @@ export function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const content = useSiteContent();
 
   const NAV = [
     { id: 'cat', label: 'Categorie', has: true },
@@ -143,16 +148,20 @@ export function Header() {
       {/* utility strip - desktop only */}
       {!isMobile && (
         <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--color-ice-50)' }}>
-          <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '7px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18 }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="phone" size={11} /> +39 0331 555 220</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="mail" size={11} /> trade@cleanvillage.it</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="clock" size={11} /> Lun–Ven · 08:30–18:00</span>
+          <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '7px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em', flexWrap: 'wrap', gap: 10 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+              <a href={`tel:${content.company.phonePrimary.replace(/\s+/g, '')}`} style={{ color: 'var(--fg-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Icon name="phone" size={11} /> {content.company.phonePrimary}
+              </a>
+              <a href={`mailto:${content.company.emailPrimary}`} style={{ color: 'var(--fg-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Icon name="mail" size={11} /> {content.company.emailPrimary}
+              </a>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="clock" size={11} /> {content.company.hours}</span>
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18 }}>
-              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>Condizioni di vendita</a>
-              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>Condizioni di garanzia</a>
-              <Link to="/admin" style={{ color: 'var(--color-teal-500)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}><Icon name="lock" size={11} /> Area trade desk</Link>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>{content.utility.salesTerms}</a>
+              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>{content.utility.warrantyTerms}</a>
+              <Link to="/admin" style={{ color: 'var(--color-teal-500)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}><Icon name="lock" size={11} /> {content.utility.tradeArea}</Link>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="globe" size={11} /> IT</span>
             </span>
           </div>
@@ -228,14 +237,25 @@ export function Header() {
 
 export function Footer() {
   const isMobile = useIsMobile();
+  const content = useSiteContent();
+  const co = content.company;
+  const directions = buildDirectionsUrl(co.operationalAddress);
   const Col = ({ title, children }) => (
     <div>
       <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-300)', marginBottom: 18 }}>{title}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>{children}</div>
     </div>
   );
-  const Lk = ({ children }) => (
-    <a href="#" onClick={e => e.preventDefault()} style={{ fontSize: 13, color: 'var(--color-teal-100)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>{children}</a>
+  const Lk = ({ children, href = '#', external }) => (
+    <a
+      href={href}
+      onClick={href === '#' ? (e => e.preventDefault()) : undefined}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noopener noreferrer' : undefined}
+      style={{ fontSize: 13, color: 'var(--color-teal-100)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+    >
+      {children}
+    </a>
   );
   return (
     <footer style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', marginTop: 'auto', position: 'relative' }}>
@@ -245,14 +265,24 @@ export function Footer() {
           <div style={{ gridColumn: isMobile ? '1 / -1' : 'auto' }}>
             <Logo inverse size="lg" />
             <p style={{ marginTop: 18, fontSize: 14, color: 'var(--color-teal-100)', maxWidth: '34ch', lineHeight: 1.6, fontWeight: 400 }}>
-              Macchinari per la pulizia industriale e forniture all'ingrosso. Al servizio di imprese e contractor in tutto il Nord Italia dal 1985.
+              {co.tagline}
             </p>
-            <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-              {['linkedin', 'facebook', 'youtube', 'instagram'].map(s => (
-                <a key={s} href="#" onClick={e => e.preventDefault()} aria-label={s} style={{ width: 34, height: 34, display: 'inline-grid', placeItems: 'center', borderRadius: 'var(--radius-xs)', background: 'rgba(255,255,255,0.06)', color: 'var(--color-teal-100)', textDecoration: 'none' }}>
-                  <span dangerouslySetInnerHTML={{ __html: SOCIAL_SVGS[s] }} />
-                </a>
+            <div style={{ marginTop: 18, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {co.certifications.map(c => (
+                <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(255,255,255,0.08)', borderRadius: 999, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-mint-300)', fontWeight: 600, letterSpacing: '0.04em' }}>
+                  <Icon name="badge-check" size={11} />{c}
+                </span>
               ))}
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
+              {['linkedin', 'facebook', 'youtube', 'instagram'].map(s => {
+                const url = co.socials?.[s];
+                return (
+                  <a key={s} href={url || '#'} onClick={url ? undefined : (e => e.preventDefault())} target={url ? '_blank' : undefined} rel={url ? 'noopener noreferrer' : undefined} aria-label={s} style={{ width: 34, height: 34, display: 'inline-grid', placeItems: 'center', borderRadius: 'var(--radius-xs)', background: 'rgba(255,255,255,0.06)', color: 'var(--color-teal-100)', textDecoration: 'none' }}>
+                    <span dangerouslySetInnerHTML={{ __html: SOCIAL_SVGS[s] }} />
+                  </a>
+                );
+              })}
             </div>
           </div>
           <Col title="Categorie">
@@ -265,30 +295,30 @@ export function Footer() {
           </Col>
           <Col title="Servizi">
             <Lk>Preventivi</Lk>
-            <Lk>Showroom</Lk>
+            <Lk>Sede operativa</Lk>
             <Lk>Assistenza</Lk>
             <Lk>Noleggio</Lk>
             <Lk>Formazione</Lk>
           </Col>
           {!isMobile && (
-            <Col title="Trade desk">
-              <Lk><Icon name="phone" size={12} /> +39 0331 555 220</Lk>
-              <Lk><Icon name="mail" size={12} /> trade@cleanvillage.it</Lk>
-              <Lk><Icon name="clock" size={12} /> Lun–Ven · 08:30–18:00</Lk>
-              <Lk><Icon name="truck" size={12} /> Spedizioni in tutta UE</Lk>
+            <Col title="Contatti">
+              <Lk href={`tel:${co.phonePrimary.replace(/\s+/g, '')}`}><Icon name="phone" size={12} /> {co.phonePrimary}</Lk>
+              <Lk href={`tel:${co.phoneSecondary.replace(/\s+/g, '')}`}><Icon name="phone" size={12} /> {co.phoneSecondary}</Lk>
+              <Lk href={`mailto:${co.emailPrimary}`}><Icon name="mail" size={12} /> {co.emailPrimary}</Lk>
+              <Lk><Icon name="clock" size={12} /> {co.hours}</Lk>
             </Col>
           )}
           {!isMobile && (
             <Col title="Sede operativa">
-              <Lk>Via dell'Industria 24</Lk>
-              <Lk>21052 Busto Arsizio (VA)</Lk>
+              <Lk>{co.operationalAddress.split('—')[0]?.trim() || co.operationalAddress}</Lk>
+              <Lk>{co.operationalCity}</Lk>
               <Lk>Italia</Lk>
-              <Lk><Icon name="map-pin" size={12} /> Indicazioni stradali</Lk>
+              <Lk href={directions} external><Icon name="map-pin" size={12} /> Indicazioni stradali</Lk>
             </Col>
           )}
         </div>
-        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--color-teal-700)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-100)', opacity: 0.8, gap: 12 }}>
-          <span>© 2026 CleanVillage Srl · P.IVA 01234567891</span>
+        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--color-teal-700)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-100)', opacity: 0.85, gap: 12 }}>
+          <span>© {new Date().getFullYear()} {co.name} · P.IVA {co.vat} · REA {co.rea} · Cap. Soc. {co.capSoc}</span>
           <span style={{ display: 'inline-flex', gap: 18 }}>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>Cookie</a>

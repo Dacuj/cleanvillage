@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { useAuth } from '../lib/auth.jsx';
 import { isSupabaseConfigured } from '../lib/supabase.js';
+import { useIsMobile } from '../lib/useBreakpoint.js';
 
 /* ============================================================
    ICON helper
@@ -26,11 +27,24 @@ export function AdminIcon({ name, size = 16, color, strokeWidth = 1.75, style })
    ADMIN SHELL
    ============================================================ */
 export function AdminShell({ page, children }) {
+  const isMobile = useIsMobile(960);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Close the mobile drawer when the page changes.
+  useEffect(() => { setDrawerOpen(false); }, [page]);
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '248px 1fr', minHeight: '100vh', background: 'var(--bg-page)' }}>
-      <AdminSidebar page={page} />
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '248px 1fr', minHeight: '100vh', background: 'var(--bg-page)' }}>
+      {!isMobile && <AdminSidebar page={page} />}
+      {isMobile && drawerOpen && (
+        <>
+          <div onClick={() => setDrawerOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
+          <div style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '86vw', maxWidth: 300, zIndex: 50, overflowY: 'auto' }}>
+            <AdminSidebar page={page} onNavigate={() => setDrawerOpen(false)} />
+          </div>
+        </>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
-        <AdminTopBar page={page} />
+        <AdminTopBar page={page} isMobile={isMobile} onOpenDrawer={() => setDrawerOpen(true)} />
         <main style={{ flex: 1, overflow: 'auto' }}>
           {children}
         </main>
@@ -39,13 +53,14 @@ export function AdminShell({ page, children }) {
   );
 }
 
-function AdminSidebar({ page }) {
+function AdminSidebar({ page, onNavigate }) {
   const navigate = useNavigate();
+  const go = (path) => { navigate(path); onNavigate?.(); };
   const groups = [
     {
       label: 'Generale', items: [
         { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard', path: '/admin' },
-        { id: 'orders', icon: 'shopping-bag', label: 'Ordini & RDA', badge: 12, path: '/admin/orders' },
+        { id: 'landing', icon: 'layout-template', label: 'Editor sito', path: '/admin/landing', badge: 'NEW' },
         { id: 'quotes', icon: 'file-text', label: 'Preventivi', badge: 4, path: '/admin/quotes' },
       ]
     },
@@ -67,7 +82,8 @@ function AdminSidebar({ page }) {
     },
     {
       label: 'Amministrazione', items: [
-        { id: 'users', icon: 'users', label: 'Buyer trade', path: '/admin/users' },
+        { id: 'orders', icon: 'shopping-bag', label: 'Ordini & RDA', badge: 12, path: '/admin/orders' },
+        { id: 'users', icon: 'users', label: 'Buyer', path: '/admin/users' },
         { id: 'settings', icon: 'settings', label: 'Impostazioni', path: '/admin/settings' },
       ]
     },
@@ -82,7 +98,7 @@ function AdminSidebar({ page }) {
             <text x="0" y="20" fontFamily="Outfit, sans-serif" fontWeight="300" fontSize="20" fill="white" letterSpacing="-0.03em">CleanVillage</text>
           </svg>
         </Link>
-        <div style={{ marginTop: 6, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-300)', fontWeight: 600 }}>Console interna · v2.4</div>
+        <div style={{ marginTop: 6, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-300)', fontWeight: 600 }}>Console interna · v2.5</div>
       </div>
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '18px 12px 24px' }}>
@@ -92,7 +108,7 @@ function AdminSidebar({ page }) {
             {g.items.map(it => {
               const active = it.id === page;
               return (
-                <a key={it.id} href="#" onClick={(e) => { e.preventDefault(); navigate(it.path); }}
+                <a key={it.id} href="#" onClick={(e) => { e.preventDefault(); go(it.path); }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 11,
                     padding: '8px 10px', borderRadius: 'var(--radius-sm)',
@@ -104,7 +120,7 @@ function AdminSidebar({ page }) {
                   <AdminIcon name={it.icon} size={15} />
                   <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.label}</span>
                   {it.badge != null && (
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 999, background: active ? 'var(--color-mint-500)' : 'rgba(255,255,255,0.18)', color: 'var(--color-white)' }}>{it.badge}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 999, background: it.badge === 'NEW' ? 'var(--color-mint-500)' : (active ? 'var(--color-mint-500)' : 'rgba(255,255,255,0.18)'), color: 'var(--color-white)' }}>{it.badge}</span>
                   )}
                   {it.count != null && it.badge == null && (
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: active ? 'var(--fg-muted)' : 'rgba(198,222,229,0.7)' }}>{it.count}</span>
@@ -142,37 +158,47 @@ function SidebarUserCard() {
   );
 }
 
-function AdminTopBar({ page }) {
+function AdminTopBar({ page, isMobile, onOpenDrawer }) {
   const navigate = useNavigate();
   const titles = {
-    dashboard: 'Dashboard', products: 'Catalogo prodotti', videos: 'Video landing',
+    dashboard: 'Dashboard', landing: 'Editor sito',
+    products: 'Catalogo prodotti', videos: 'Video landing',
     categories: 'Categorie', brands: 'Marchi', pricing: 'Listini & sconti',
     orders: 'Ordini & RDA', quotes: 'Preventivi', courses: 'Corsi & formazione',
     promos: 'Promozioni', highlights: 'Macchine in evidenza',
-    users: 'Buyer trade', settings: 'Impostazioni',
+    users: 'Buyer', settings: 'Impostazioni',
   };
   return (
-    <header style={{ height: 62, background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', padding: '0 28px', display: 'flex', alignItems: 'center', gap: 20, flexShrink: 0, position: 'sticky', top: 0, zIndex: 5 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>
-        <span>cleanvillage.it</span>
-        <AdminIcon name="chevron-right" size={11} />
-        <span>admin</span>
-        <AdminIcon name="chevron-right" size={11} />
-        <span style={{ color: 'var(--fg-primary)', fontWeight: 600 }}>{titles[page] || page}</span>
+    <header style={{ height: 62, background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', padding: isMobile ? '0 14px' : '0 28px', display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 20, flexShrink: 0, position: 'sticky', top: 0, zIndex: 5 }}>
+      {isMobile && (
+        <button onClick={onOpenDrawer} aria-label="Apri menu" style={{ width: 38, height: 38, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', background: 'transparent', cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+          <AdminIcon name="menu" size={18} />
+        </button>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', minWidth: 0, overflow: 'hidden' }}>
+        {!isMobile && <>
+          <span>cleanvillage.it</span>
+          <AdminIcon name="chevron-right" size={11} />
+          <span>admin</span>
+          <AdminIcon name="chevron-right" size={11} />
+        </>}
+        <span style={{ color: 'var(--fg-primary)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{titles[page] || page}</span>
       </div>
       <span style={{ flex: 1 }} />
-      <div style={{ position: 'relative', width: 320 }}>
-        <AdminIcon name="search" size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-muted)' }} />
-        <input placeholder="Cerca prodotti, ordini, buyer, codici…"
-          style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px 8px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-50)', border: '1px solid transparent', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--fg-primary)' }} />
-        <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--fg-muted)', background: 'var(--bg-surface)', padding: '1px 5px', border: '1px solid var(--border-subtle)', borderRadius: 3 }}>⌘K</span>
-      </div>
-      <button style={{ position: 'relative', width: 36, height: 36, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', background: 'transparent', cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
+      {!isMobile && (
+        <div style={{ position: 'relative', width: 320 }}>
+          <AdminIcon name="search" size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-muted)' }} />
+          <input placeholder="Cerca prodotti, ordini, buyer, codici…"
+            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px 8px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-50)', border: '1px solid transparent', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--fg-primary)' }} />
+          <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--fg-muted)', background: 'var(--bg-surface)', padding: '1px 5px', border: '1px solid var(--border-subtle)', borderRadius: 3 }}>⌘K</span>
+        </div>
+      )}
+      <button style={{ position: 'relative', width: 36, height: 36, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', background: 'transparent', cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
         <AdminIcon name="bell" size={15} color="var(--fg-secondary)" />
         <span style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: 'var(--color-mint-500)', boxShadow: '0 0 0 2px var(--bg-surface)' }} />
       </button>
-      <a href="/" target="_blank" onClick={(e) => { e.preventDefault(); navigate('/'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', fontSize: 12, fontWeight: 600, color: 'var(--color-teal-500)', textDecoration: 'none', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-sm)' }}>
-        <AdminIcon name="external-link" size={12} /> Vedi sito live
+      <a href="/" target="_blank" onClick={(e) => { e.preventDefault(); navigate('/'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', fontSize: 12, fontWeight: 600, color: 'var(--color-teal-500)', textDecoration: 'none', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-sm)', whiteSpace: 'nowrap' }}>
+        <AdminIcon name="external-link" size={12} /> {isMobile ? 'Sito' : 'Vedi sito live'}
       </a>
     </header>
   );
@@ -182,15 +208,16 @@ function AdminTopBar({ page }) {
    PAGE WRAPPER
    ============================================================ */
 export function AdminPage({ eyebrow, title, subtitle, actions, children }) {
+  const isMobile = useIsMobile(960);
   return (
-    <div style={{ padding: '32px 36px 40px', maxWidth: 1400, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 20, marginBottom: 32, flexWrap: 'wrap' }}>
-        <div>
+    <div style={{ padding: isMobile ? '20px 16px 32px' : '32px 36px 40px', maxWidth: 1400, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'end', gap: 20, marginBottom: isMobile ? 22 : 32, flexWrap: 'wrap' }}>
+        <div style={{ minWidth: 0 }}>
           {eyebrow && <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-700)', marginBottom: 8 }}>{eyebrow}</div>}
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 36, letterSpacing: '-0.035em', margin: 0, lineHeight: 1.06, color: 'var(--fg-primary)' }}>{title}</h1>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: isMobile ? 28 : 36, letterSpacing: '-0.035em', margin: 0, lineHeight: 1.06, color: 'var(--fg-primary)' }}>{title}</h1>
           {subtitle && <p style={{ margin: '10px 0 0', fontSize: 14, color: 'var(--fg-secondary)', lineHeight: 1.5, maxWidth: '70ch' }}>{subtitle}</p>}
         </div>
-        {actions && <div style={{ display: 'flex', gap: 10 }}>{actions}</div>}
+        {actions && <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>{actions}</div>}
       </div>
       {children}
     </div>

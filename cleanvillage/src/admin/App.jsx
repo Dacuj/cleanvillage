@@ -6,6 +6,7 @@ import AdminVideos from './Videos.jsx';
 import AdminCategories from './Categories.jsx';
 import AdminBrands from './Brands.jsx';
 import AdminQuotes from './Quotes.jsx';
+import AdminLanding from './LandingEditor.jsx';
 import Placeholder from './Placeholder.jsx';
 import AdminLogin from './Login.jsx';
 import { useAuth } from '../lib/auth.jsx';
@@ -39,6 +40,7 @@ export default function AdminApp() {
     <AdminShell page={page}>
       <Routes>
         <Route path="/" element={<AdminDashboard />} />
+        <Route path="/landing" element={<AdminLanding />} />
         <Route path="/products" element={<AdminProducts />} />
         <Route path="/videos" element={<AdminVideos />} />
         <Route path="/categories" element={<AdminCategories />} />

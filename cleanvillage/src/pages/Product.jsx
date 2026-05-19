@@ -220,9 +220,9 @@ export default function Product() {
             ))}
           </div>
           <div style={{ padding: '40px 0' }}>
-            {tab === 'specs' && <SpecsTable />}
-            {tab === 'features' && <FeaturesList />}
-            {tab === 'service' && <ServiceInfo />}
+            {tab === 'specs' && <SpecsTable isMobile={isMobile} />}
+            {tab === 'features' && <FeaturesList isMobile={isMobile} />}
+            {tab === 'service' && <ServiceInfo isMobile={isMobile} />}
             {tab === 'reviews' && <ReviewsList />}
           </div>
         </div>
@@ -240,7 +240,7 @@ export default function Product() {
             </div>
             <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>Vedi tutta la categoria</Button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? 14 : 20 }}>
             {related.map(p => <ProductCard key={p.id} product={p} onClick={() => navigate(`/product/${p.id}`)} />)}
           </div>
         </div>
@@ -249,7 +249,7 @@ export default function Product() {
   );
 }
 
-function SpecsTable() {
+function SpecsTable({ isMobile }) {
   const rows = [
     ['Tipologia', 'Lavasciuga pavimenti uomo a bordo'],
     ['Larghezza piste', '1000 mm'],
@@ -270,29 +270,24 @@ function SpecsTable() {
     ['Origine', 'Made in Italy'],
     ['Certificazioni', 'CE · EMC 2014/30/UE · MD 2006/42/CE'],
   ];
+  const renderCell = (r) => (
+    <div key={r[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', padding: '12px 0', borderBottom: '1px solid var(--border-subtle)', gap: 24 }}>
+      <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{r[0]}</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg-primary)', fontWeight: 500 }}>{r[1]}</span>
+    </div>
+  );
+  if (isMobile) {
+    return <div>{rows.map(renderCell)}</div>;
+  }
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 64px' }}>
-      <div>
-        {rows.slice(0, 9).map((r) => (
-          <div key={r[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', padding: '12px 0', borderBottom: '1px solid var(--border-subtle)', gap: 24 }}>
-            <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{r[0]}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg-primary)', fontWeight: 500 }}>{r[1]}</span>
-          </div>
-        ))}
-      </div>
-      <div>
-        {rows.slice(9).map((r) => (
-          <div key={r[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', padding: '12px 0', borderBottom: '1px solid var(--border-subtle)', gap: 24 }}>
-            <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{r[0]}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg-primary)', fontWeight: 500 }}>{r[1]}</span>
-          </div>
-        ))}
-      </div>
+      <div>{rows.slice(0, 9).map(renderCell)}</div>
+      <div>{rows.slice(9).map(renderCell)}</div>
     </div>
   );
 }
 
-function FeaturesList() {
+function FeaturesList({ isMobile }) {
   const feats = [
     { i: 'cpu', t: 'Pannello touch programmabile', d: 'Tre programmi salvabili: piste, intensità detergente, pressione spazzole.' },
     { i: 'battery', t: 'Autonomia 4 ore', d: 'Batteria al gel 36V 240Ah, carica rapida 4h. Opzione litio disponibile.' },
@@ -300,7 +295,7 @@ function FeaturesList() {
     { i: 'shield-check', t: 'Telaio in acciaio rinforzato', d: 'Protezioni paracolpi, copertura motore stagna IPX4, ruote anti-traccia.' },
   ];
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? 14 : 24 }}>
       {feats.map(f => (
         <div key={f.t} style={{ display: 'flex', gap: 18, padding: '24px 26px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
           <span style={{ width: 44, height: 44, display: 'grid', placeItems: 'center', background: 'var(--color-teal-50)', color: 'var(--color-teal-500)', borderRadius: 'var(--radius-sm)', flexShrink: 0 }}>
@@ -316,9 +311,9 @@ function FeaturesList() {
   );
 }
 
-function ServiceInfo() {
+function ServiceInfo({ isMobile }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 24 : 32 }}>
       <div>
         <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 20, letterSpacing: '-0.02em', margin: '0 0 12px' }}>Officina autorizzata</h4>
         <p style={{ margin: '0 0 18px', fontSize: 14, color: 'var(--fg-secondary)', lineHeight: 1.6 }}>
