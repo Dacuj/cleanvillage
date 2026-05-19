@@ -101,8 +101,8 @@ function MobileDrawer({ onClose }) {
           <button onClick={() => go('/contact')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
             <Icon name="mail" size={18} /> Contatti
           </button>
-          <button onClick={() => go('/video-aziendale')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
-            <Icon name="play" size={18} /> Video Aziendale
+          <button onClick={() => go('/scopri-macchina')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+            <Icon name="sparkles" size={18} /> Scopri la macchina ideale
           </button>
           <button onClick={() => go('/servizi')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
             <Icon name="wrench" size={18} /> Servizi
@@ -166,7 +166,7 @@ export function Header() {
     { id: 'cat', label: 'Categorie', has: true },
     { id: 'brand', label: 'Marchi', has: true },
     { id: 'contact', label: 'Contatti', path: '/contact' },
-    { id: 'video', label: 'Video Aziendale', path: '/video-aziendale' },
+    { id: 'finder', label: 'Scopri la macchina ideale', path: '/scopri-macchina' },
     { id: 'services', label: 'Servizi', path: '/servizi' },
     { id: 'about', label: 'Azienda', path: '/azienda' },
   ];

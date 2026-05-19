@@ -633,7 +633,7 @@ export default function LandingEditor() {
         </SubSection>
       </Section>
 
-      <Section title="Pagina &quot;Video Aziendale&quot;" icon="video" desc="La pagina dedicata al video di presentazione (raggiungibile da Header e Footer).">
+      <Section title="Sezione video (dentro pagina Azienda)" icon="video" desc="Il blocco con titolo, intro e iframe video che ora vive nella pagina /azienda.">
         <Grid cols={2}>
           <AField label="Eyebrow"><AInput value={content.pages.videoPage.eyebrow} onChange={(e) => update('pages.videoPage.eyebrow', e.target.value)} /></AField>
           <AField label="Titolo"><AInput value={content.pages.videoPage.title} onChange={(e) => update('pages.videoPage.title', e.target.value)} /></AField>

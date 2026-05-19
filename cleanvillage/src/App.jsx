@@ -6,7 +6,7 @@ import Product from './pages/Product.jsx';
 import Contact from './pages/Contact.jsx';
 import About from './pages/About.jsx';
 import Services from './pages/Services.jsx';
-import VideoPage from './pages/VideoPage.jsx';
+import MachineFinder from './pages/MachineFinder.jsx';
 import LegalRoute from './pages/LegalRoute.jsx';
 import AdminApp from './admin/App.jsx';
 
@@ -21,7 +21,7 @@ function StorefrontLayout() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/azienda" element={<About />} />
         <Route path="/servizi" element={<Services />} />
-        <Route path="/video-aziendale" element={<VideoPage />} />
+        <Route path="/scopri-macchina" element={<MachineFinder />} />
         <Route path="/condizioni-vendita" element={<LegalRoute slug="salesTerms" />} />
         <Route path="/garanzia" element={<LegalRoute slug="warranty" />} />
         <Route path="/privacy" element={<LegalRoute slug="privacy" />} />

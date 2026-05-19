@@ -8,6 +8,7 @@ export default function About() {
   const isMobile = useIsMobile();
   const content = useSiteContent();
   const page = content.pages.about;
+  const videoPage = content.pages.videoPage;
   const co = content.company;
 
   return (
@@ -49,6 +50,46 @@ export default function About() {
           ))}
         </div>
       </section>
+
+      {videoPage && (
+        <section style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)', padding: isMobile ? '48px 20px' : '80px 32px' }}>
+          <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.3fr', gap: isMobile ? 28 : 56, alignItems: 'center' }}>
+            <div>
+              <Eyebrow>{videoPage.eyebrow}</Eyebrow>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(26px, 3.4vw, 38px)', letterSpacing: '-0.03em', margin: '14px 0 16px', maxWidth: '20ch', lineHeight: 1.1 }}>
+                {videoPage.title}
+              </h2>
+              <p style={{ margin: 0, color: 'var(--fg-secondary)', fontSize: isMobile ? 15 : 16, lineHeight: 1.65, maxWidth: '46ch' }}>
+                {videoPage.intro}
+              </p>
+              {videoPage.cta && (
+                <div style={{ marginTop: 22 }}>
+                  <Button variant="cta" onClick={() => navigate('/contact')} iconRight={<Icon name="arrow-right" size={14} />}>{videoPage.cta}</Button>
+                </div>
+              )}
+            </div>
+            <div style={{ aspectRatio: '16/9', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-subtle)', background: '#0F2330', position: 'relative' }}>
+              {videoPage.embedUrl ? (
+                <iframe
+                  title={videoPage.embedTitle || 'Video Clean Village'}
+                  src={videoPage.embedUrl}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ width: '100%', height: '100%', border: 0 }}
+                />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: 'var(--color-teal-100)', fontFamily: 'var(--font-mono)', fontSize: 13, textAlign: 'center', padding: 20 }}>
+                  <div>
+                    <Icon name="video" size={36} />
+                    <div style={{ marginTop: 12, fontSize: 14 }}>Video in preparazione</div>
+                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.7 }}>L'amministratore può inserire l'URL embed dalla dashboard.</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', padding: isMobile ? '48px 20px' : '72px 32px' }}>
         <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: isMobile ? 28 : 56, alignItems: 'center' }}>
