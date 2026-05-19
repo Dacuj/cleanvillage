@@ -22,17 +22,23 @@ Tempo stimato: **10 minuti**.
 
 ## 2. Esegui lo schema SQL
 
-1. Nel dashboard del progetto, clicca **SQL Editor** nella sidebar (icona ).
+1. Nel dashboard del progetto, clicca **SQL Editor** nella sidebar.
 2. Clicca **New query**.
 3. Apri il file `supabase/migrations/0001_init.sql` di questo repo, copia tutto il contenuto, incollalo nell'editor.
 4. Clicca **Run** (in basso a destra, o `⌘/Ctrl + Enter`).
-5. Dovresti vedere `Success. No rows returned.`
+5. Ripeti per `supabase/migrations/0002_site_content.sql` (tabella CMS della landing + bucket immagini).
+6. Ripeti per `supabase/migrations/0003_clear_products.sql` (svuota i prodotti di esempio in modo da partire da zero).
+7. Dovresti vedere `Success. No rows returned.` per ognuna.
 
-### Carica i dati iniziali
+### (Opzionale) Carica i dati iniziali di catalogo
 
 1. Clicca di nuovo **New query**.
-2. Apri `supabase/seed.sql`, copia tutto, incolla, **Run**.
-3. Per verificare: vai su **Table Editor** → dovresti vedere le tabelle `products` (12 righe), `categories` (11), `brands` (12), ecc.
+2. Apri `supabase/seed.sql`, copia tutto, incolla, **Run**. Questo popola
+   categorie, marchi, settori, corsi e video di esempio.
+3. **NB**: il seed include anche prodotti finti; se hai già lanciato la
+   migration `0003_clear_products.sql` puoi rimuovere le righe `insert into
+   products ...` dal seed prima di eseguirlo, oppure ri-lanciare la
+   `0003` subito dopo per ripulire.
 
 ---
 
@@ -103,8 +109,12 @@ Le immagini appaiono immediatamente nella card prodotto del catalogo e nella pag
 
 Tutte le sezioni `/admin/...` sono ora collegate al DB:
 
+- **`/admin/landing`** — Editor sito: testi della landing + immagini + pagine
+  Azienda / Servizi / Video / Privacy / Cookie / Termini / Condizioni di
+  vendita / Garanzia. Le modifiche vengono pubblicate **online** (tabella
+  `site_content`, bucket `landing-images`).
 - **`/admin/products`** — Aggiungi/modifica/elimina SKU
-- **`/admin/categories`** — Gestisci le 11 categorie
+- **`/admin/categories`** — Gestisci le categorie
 - **`/admin/brands`** — Aggiungi/modifica i marchi distribuiti
 - **`/admin/videos`** — Pubblica/spegni i video della landing
 - **`/admin/quotes`** — Ricevi i preventivi inviati dal form contatti

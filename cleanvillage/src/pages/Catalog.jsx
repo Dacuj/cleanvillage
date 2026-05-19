@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon, Button, Eyebrow } from '../components/ui.jsx';
 import { inputStyle, Check } from '../components/fields.jsx';
 import { ProductCard } from '../components/product.jsx';
@@ -9,10 +9,12 @@ import { useIsMobile } from '../lib/useBreakpoint.js';
 export default function Catalog() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [activeCat, setActiveCat] = useState('all');
+  const [params, setParams] = useSearchParams();
+  const [activeCat, setActiveCatState] = useState(() => params.get('cat') || 'all');
+  const [activeBrand, setActiveBrandState] = useState(() => params.get('brand') || null);
   const [activeFilters, setActiveFilters] = useState(['Disponibile']);
   const [sort, setSort] = useState('relevance');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => params.get('q') || '');
   const [view, setView] = useState('grid');
   const [cats, setCats] = useState([]);
   const [products, setProducts] = useState([]);
@@ -24,12 +26,33 @@ export default function Catalog() {
     }).catch(console.error);
   }, []);
 
+  // Keep state in sync when the URL changes (back/forward, deep linking).
+  useEffect(() => {
+    setActiveCatState(params.get('cat') || 'all');
+    setActiveBrandState(params.get('brand') || null);
+    setSearch(params.get('q') || '');
+  }, [params]);
+
+  // Wrap the setters so that whenever filters change the URL is updated too.
+  const updateParams = (patch) => {
+    const next = new URLSearchParams(params);
+    Object.entries(patch).forEach(([k, v]) => {
+      if (v == null || v === '' || v === 'all') next.delete(k);
+      else next.set(k, v);
+    });
+    setParams(next, { replace: true });
+  };
+  const setActiveCat = (cat) => { setActiveCatState(cat); updateParams({ cat }); };
+  const setActiveBrand = (brand) => { setActiveBrandState(brand); updateParams({ brand }); };
+  const setSearchTerm = (q) => { setSearch(q); updateParams({ q }); };
+
   const filtered = useMemo(() => {
     let r = products;
     if (activeCat !== 'all') r = r.filter(p => p.catId === activeCat);
+    if (activeBrand) r = r.filter(p => (p.brand || '').toLowerCase() === activeBrand.toLowerCase());
     if (search.trim()) r = r.filter(p => (p.name + ' ' + p.brand + ' ' + p.sku).toLowerCase().includes(search.toLowerCase()));
     return r;
-  }, [products, activeCat, search]);
+  }, [products, activeCat, activeBrand, search]);
 
   const removeFilter = (f) => setActiveFilters(activeFilters.filter(x => x !== f));
 
@@ -61,7 +84,7 @@ export default function Catalog() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <SearchBox value={search} onChange={setSearch} />
+              <SearchBox value={search} onChange={setSearchTerm} />
               <SortMenu value={sort} onChange={setSort} />
             </div>
           </div>
@@ -101,12 +124,15 @@ export default function Catalog() {
                   <Icon name="sliders-horizontal" size={14} /> Filtri {activeCat !== 'all' && '· 1'}
                 </button>
               )}
-              {activeFilters.length > 0 && (
-                <>
-                  {!isMobile && <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600 }}>Filtri attivi</span>}
-                  {activeFilters.map(f => <FilterChip key={f} onRemove={() => removeFilter(f)}>{f}</FilterChip>)}
-                  <button onClick={() => setActiveFilters([])} style={{ background: 'transparent', border: 'none', color: 'var(--color-teal-500)', fontSize: 12, fontWeight: 500, textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Azzera</button>
-                </>
+              {!isMobile && (activeFilters.length > 0 || activeBrand) && (
+                <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600 }}>Filtri attivi</span>
+              )}
+              {activeBrand && (
+                <FilterChip onRemove={() => setActiveBrand(null)}>Marchio: {activeBrand}</FilterChip>
+              )}
+              {activeFilters.map(f => <FilterChip key={f} onRemove={() => removeFilter(f)}>{f}</FilterChip>)}
+              {(activeFilters.length > 0 || activeBrand) && (
+                <button onClick={() => { setActiveFilters([]); setActiveBrand(null); }} style={{ background: 'transparent', border: 'none', color: 'var(--color-teal-500)', fontSize: 12, fontWeight: 500, textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Azzera</button>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>

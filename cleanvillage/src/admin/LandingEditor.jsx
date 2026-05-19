@@ -4,10 +4,11 @@ import {
   useSiteContent,
   setSiteContent,
   resetSiteContent,
-  DEFAULT_CONTENT,
+  useRemoteSaveStatus,
+  resolveImageSlot,
 } from '../lib/siteContent.js';
-
-const IMAGE_KEY_PREFIX = 'imgslot:';
+import { uploadLandingImage, deleteLandingImage } from '../lib/api.js';
+import { isSupabaseConfigured } from '../lib/supabase.js';
 
 const IMAGE_SLOTS = [
   { id: 'heroImage', label: 'Hero — immagine principale', desc: 'Visibile a destra del titolo nella prima sezione' },
@@ -18,7 +19,6 @@ const IMAGE_SLOTS = [
 
 export default function LandingEditor() {
   const content = useSiteContent();
-  const [savedAt, setSavedAt] = useState(null);
 
   const update = (path, value) => {
     setSiteContent((current) => {
@@ -33,30 +33,20 @@ export default function LandingEditor() {
       obj[keys[keys.length - 1]] = value;
       return next;
     });
-    setSavedAt(new Date());
   };
 
   const reset = () => {
-    if (!confirm('Ripristinare tutti i testi e le immagini ai valori originali? Le immagini caricate verranno rimosse.')) return;
+    if (!confirm('Ripristinare tutti i testi e le immagini ai valori originali? Le immagini caricate verranno rimosse dalla landing (i file restano nello storage).')) return;
     resetSiteContent();
-    // Also clear all image slot localStorage entries
-    try {
-      Object.keys(localStorage)
-        .filter((k) => k.startsWith(IMAGE_KEY_PREFIX))
-        .forEach((k) => localStorage.removeItem(k));
-    } catch {
-      /* ignore */
-    }
-    setSavedAt(new Date());
   };
 
   return (
     <AdminPage
       eyebrow="Contenuti landing"
       title="Editor sito"
-      subtitle="Modifica i testi e le immagini della landing senza toccare il codice. Tutte le modifiche sono salvate automaticamente."
+      subtitle="Modifica i testi e le immagini della landing senza toccare il codice. Le modifiche vengono pubblicate online in tempo reale."
       actions={[
-        <SaveIndicator key="s" savedAt={savedAt} />,
+        <SaveIndicator key="s" />,
         <ABtn key="o" variant="secondary" icon={<AdminIcon name="external-link" size={13} />} onClick={() => window.open('/', '_blank')}>
           Vedi sito
         </ABtn>,
@@ -585,25 +575,163 @@ export default function LandingEditor() {
       {/* ============================================================
           IMAGES
           ============================================================ */}
-      <Section title="Immagini sito" icon="image" desc="Carica le foto reali al posto dei segnaposto.">
+      <Section title="Immagini landing" icon="image" desc="Carica le foto reali al posto dei segnaposto. Vengono pubblicate online e viste da tutti i visitatori.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
           {IMAGE_SLOTS.map((s) => (
-            <ImageSlotEditor key={s.id} slot={s} onChange={() => setSavedAt(new Date())} />
+            <ImageSlotEditor key={s.id} slot={s} content={content} />
           ))}
         </div>
       </Section>
 
-      <div style={{ marginTop: 32, padding: '18px 22px', background: 'var(--color-mint-50)', border: '1px solid var(--color-mint-300)', borderRadius: 'var(--radius-md)', display: 'flex', gap: 12, alignItems: 'center' }}>
-        <AdminIcon name="check-circle" size={18} color="var(--color-mint-700)" />
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 14, color: 'var(--color-mint-800)' }}>Modifiche salvate automaticamente</div>
-          <div style={{ fontSize: 12, color: 'var(--fg-secondary)', marginTop: 2 }}>
-            Tutte le modifiche sono salvate in locale nel browser e visibili immediatamente sul sito. Apri il sito in una nuova scheda per verificare.
-          </div>
-        </div>
-        <ABtn variant="secondary" icon={<AdminIcon name="external-link" size={13} />} onClick={() => window.open('/', '_blank')}>Vedi sito</ABtn>
-      </div>
+      {/* ============================================================
+          ABOUT / SERVIZI / VIDEO PAGE
+          ============================================================ */}
+      <Section title="Pagina &quot;Azienda&quot;" icon="building-2" desc="Testi della pagina /azienda raggiungibile dal menu principale.">
+        <Grid cols={2}>
+          <AField label="Eyebrow"><AInput value={content.pages.about.eyebrow} onChange={(e) => update('pages.about.eyebrow', e.target.value)} /></AField>
+          <AField label="Titolo"><AInput value={content.pages.about.title} onChange={(e) => update('pages.about.title', e.target.value)} /></AField>
+        </Grid>
+        <AField label="Introduzione (paragrafo principale)">
+          <ATextarea rows={3} value={content.pages.about.intro} onChange={(e) => update('pages.about.intro', e.target.value)} />
+        </AField>
+        <SubSection title="Valori (4 card)">
+          {content.pages.about.values.map((v, i) => (
+            <div key={i} style={{ padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Grid cols={3}>
+                <AField label="Icona (lucide)"><AInput value={v.icon} onChange={(e) => update(`pages.about.values.${i}.icon`, e.target.value)} /></AField>
+                <AField label="Titolo" span={2}><AInput value={v.title} onChange={(e) => update(`pages.about.values.${i}.title`, e.target.value)} /></AField>
+              </Grid>
+              <AField label="Descrizione"><ATextarea rows={2} value={v.desc} onChange={(e) => update(`pages.about.values.${i}.desc`, e.target.value)} /></AField>
+            </div>
+          ))}
+        </SubSection>
+      </Section>
+
+      <Section title="Pagina &quot;Servizi&quot;" icon="wrench" desc="Testi della pagina /servizi. Le voci possono essere richiamate anche dai link del footer (ancore).">
+        <Grid cols={2}>
+          <AField label="Eyebrow"><AInput value={content.pages.services.eyebrow} onChange={(e) => update('pages.services.eyebrow', e.target.value)} /></AField>
+          <AField label="Titolo"><AInput value={content.pages.services.title} onChange={(e) => update('pages.services.title', e.target.value)} /></AField>
+        </Grid>
+        <AField label="Introduzione"><ATextarea rows={2} value={content.pages.services.intro} onChange={(e) => update('pages.services.intro', e.target.value)} /></AField>
+        <SubSection title="Servizi (card)">
+          {content.pages.services.items.map((it, i) => (
+            <div key={i} style={{ padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Grid cols={3}>
+                <AField label="ID (per link footer)"><AInput value={it.id} onChange={(e) => update(`pages.services.items.${i}.id`, e.target.value)} /></AField>
+                <AField label="Icona"><AInput value={it.icon} onChange={(e) => update(`pages.services.items.${i}.icon`, e.target.value)} /></AField>
+                <AField label="Titolo"><AInput value={it.title} onChange={(e) => update(`pages.services.items.${i}.title`, e.target.value)} /></AField>
+              </Grid>
+              <AField label="Descrizione"><ATextarea rows={2} value={it.desc} onChange={(e) => update(`pages.services.items.${i}.desc`, e.target.value)} /></AField>
+            </div>
+          ))}
+        </SubSection>
+      </Section>
+
+      <Section title="Pagina &quot;Video Aziendale&quot;" icon="video" desc="La pagina dedicata al video di presentazione (raggiungibile da Header e Footer).">
+        <Grid cols={2}>
+          <AField label="Eyebrow"><AInput value={content.pages.videoPage.eyebrow} onChange={(e) => update('pages.videoPage.eyebrow', e.target.value)} /></AField>
+          <AField label="Titolo"><AInput value={content.pages.videoPage.title} onChange={(e) => update('pages.videoPage.title', e.target.value)} /></AField>
+        </Grid>
+        <AField label="Introduzione"><ATextarea rows={2} value={content.pages.videoPage.intro} onChange={(e) => update('pages.videoPage.intro', e.target.value)} /></AField>
+        <Grid cols={2}>
+          <AField label="Titolo embed video"><AInput value={content.pages.videoPage.embedTitle} onChange={(e) => update('pages.videoPage.embedTitle', e.target.value)} /></AField>
+          <AField label="URL embed (YouTube/Vimeo)" hint="Lascia vuoto per mostrare il placeholder">
+            <AInput value={content.pages.videoPage.embedUrl} onChange={(e) => update('pages.videoPage.embedUrl', e.target.value)} placeholder="https://www.youtube.com/embed/..." />
+          </AField>
+        </Grid>
+        <AField label="CTA (bottone)"><AInput value={content.pages.videoPage.cta} onChange={(e) => update('pages.videoPage.cta', e.target.value)} /></AField>
+      </Section>
+
+      {/* ============================================================
+          LEGAL PAGES
+          ============================================================ */}
+      <Section title="Pagine legali" icon="shield" desc="Privacy, cookie, termini, condizioni di vendita, garanzia. Ogni pagina è composta da titolo, sottotitolo e sezioni (titolo + paragrafi).">
+        {[
+          ['salesTerms', 'Condizioni di vendita'],
+          ['warranty', 'Garanzia'],
+          ['privacy', 'Privacy policy'],
+          ['cookie', 'Cookie policy'],
+          ['terms', "Termini d'uso"],
+        ].map(([slug, label]) => (
+          <LegalPageEditor key={slug} slug={slug} label={label} page={content.legalPages[slug]} update={update} />
+        ))}
+      </Section>
+
+      <PublishBanner />
     </AdminPage>
+  );
+}
+
+function PublishBanner() {
+  const status = useRemoteSaveStatus();
+  let bg = 'var(--color-mint-50)';
+  let border = 'var(--color-mint-300)';
+  let iconColor = 'var(--color-mint-700)';
+  let icon = 'check-circle';
+  let title = 'Modifiche pubblicate online';
+  let desc = "Ogni modifica viene salvata su Supabase e vista da tutti i visitatori del sito appena ricarichi la pagina.";
+
+  if (!isSupabaseConfigured) {
+    bg = 'var(--color-warning-100)';
+    border = 'var(--color-warning-500)';
+    iconColor = 'var(--color-warning-500)';
+    icon = 'alert-triangle';
+    title = 'Solo modalità locale';
+    desc = "Supabase non è configurato in questo ambiente: le modifiche restano sul tuo browser. Configura VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY per pubblicare online.";
+  } else if (status.status === 'error') {
+    bg = 'var(--color-danger-100)';
+    border = 'var(--color-danger-500)';
+    iconColor = 'var(--color-danger-500)';
+    icon = 'alert-circle';
+    title = 'Pubblicazione fallita';
+    desc = `Le modifiche sono salvate localmente ma non sono state pubblicate online. ${status.error || ''}`;
+  } else if (status.status === 'saving') {
+    title = 'Pubblicazione in corso…';
+    desc = 'Sto inviando le modifiche al server.';
+  }
+
+  return (
+    <div style={{ marginTop: 32, padding: '18px 22px', background: bg, border: `1px solid ${border}`, borderRadius: 'var(--radius-md)', display: 'flex', gap: 12, alignItems: 'center' }}>
+      <AdminIcon name={icon} size={18} color={iconColor} />
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 14, color: 'var(--fg-primary)' }}>{title}</div>
+        <div style={{ fontSize: 12, color: 'var(--fg-secondary)', marginTop: 2 }}>{desc}</div>
+      </div>
+      <ABtn variant="secondary" icon={<AdminIcon name="external-link" size={13} />} onClick={() => window.open('/', '_blank')}>Vedi sito</ABtn>
+    </div>
+  );
+}
+
+function LegalPageEditor({ slug, label, page, update }) {
+  if (!page) return null;
+  const path = `legalPages.${slug}`;
+  return (
+    <details style={{ background: 'var(--color-ice-50)', borderRadius: 'var(--radius-sm)', padding: '10px 14px' }}>
+      <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 14, color: 'var(--fg-primary)' }}>{label} <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', marginLeft: 6 }}>/{slug === 'salesTerms' ? 'condizioni-vendita' : slug === 'warranty' ? 'garanzia' : slug === 'terms' ? 'termini' : slug}</span></summary>
+      <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <Grid cols={2}>
+          <AField label="Titolo"><AInput value={page.title} onChange={(e) => update(`${path}.title`, e.target.value)} /></AField>
+          <AField label="Sottotitolo"><AInput value={page.subtitle} onChange={(e) => update(`${path}.subtitle`, e.target.value)} /></AField>
+        </Grid>
+        {(page.sections || []).map((s, i) => (
+          <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <strong style={{ fontSize: 12, color: 'var(--fg-muted)', letterSpacing: '0.06em' }}>Sezione #{i + 1}</strong>
+              <ABtn size="sm" variant="ghost" icon={<AdminIcon name="trash-2" size={12} />} onClick={() => update(`${path}.sections`, page.sections.filter((_, j) => j !== i))}>Rimuovi</ABtn>
+            </div>
+            <AField label="Titolo sezione"><AInput value={s.heading} onChange={(e) => update(`${path}.sections.${i}.heading`, e.target.value)} /></AField>
+            <AField label="Paragrafi (uno per riga)">
+              <ATextarea
+                rows={4}
+                value={(s.paragraphs || []).join('\n\n')}
+                onChange={(e) => update(`${path}.sections.${i}.paragraphs`, e.target.value.split(/\n\n+/).map(p => p.trim()).filter(Boolean))}
+              />
+            </AField>
+          </div>
+        ))}
+        <ABtn variant="secondary" icon={<AdminIcon name="plus" size={13} />} onClick={() => update(`${path}.sections`, [...(page.sections || []), { heading: 'Nuova sezione', paragraphs: [''] }])}>Aggiungi sezione</ABtn>
+      </div>
+    </details>
   );
 }
 
@@ -644,26 +772,48 @@ function Grid({ cols, children }) {
   );
 }
 
-function SaveIndicator({ savedAt }) {
-  if (!savedAt) return <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>Pronto</span>;
+function SaveIndicator() {
+  const status = useRemoteSaveStatus();
+  const map = {
+    idle:        { label: 'Pronto · salvataggio cloud attivo', color: 'var(--fg-muted)', dot: 'var(--color-ice-400)' },
+    saving:      { label: 'Pubblicazione in corso…', color: 'var(--color-teal-500)', dot: 'var(--color-teal-500)' },
+    saved:       { label: 'Pubblicato online', color: 'var(--color-mint-700)', dot: 'var(--color-mint-500)' },
+    error:       { label: 'Errore pubblicazione', color: 'var(--color-danger-500)', dot: 'var(--color-danger-500)' },
+    'local-only':{ label: 'Solo locale (Supabase non configurato)', color: 'var(--color-warning-500)', dot: 'var(--color-warning-500)' },
+  };
+  const m = map[status.status] || map.idle;
+  const time = status.at ? ` · ${new Date(status.at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}` : '';
   return (
-    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-mint-700)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-mint-500)' }} />
-      Salvato {savedAt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: m.color, display: 'inline-flex', alignItems: 'center', gap: 5 }} title={status.error || ''}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: m.dot }} />
+      {m.label}{(status.status === 'saved' || status.status === 'saving') && time}
     </span>
   );
 }
 
 function InfoBanner() {
+  if (!isSupabaseConfigured) {
+    return (
+      <div style={{ padding: '16px 20px', background: 'var(--color-warning-100)', border: '1px solid var(--color-warning-500)', borderRadius: 'var(--radius-md)', marginBottom: 20, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        <AdminIcon name="alert-triangle" size={18} color="var(--color-warning-500)" />
+        <div style={{ flex: 1, fontSize: 13, color: 'var(--fg-primary)', lineHeight: 1.6 }}>
+          <b style={{ fontFamily: 'var(--font-display)' }}>Supabase non configurato.</b>{' '}
+          Le modifiche sono salvate solo nel tuo browser e non sono visibili agli altri visitatori. Imposta
+          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--color-ice-100)', padding: '1px 5px', borderRadius: 3, margin: '0 4px' }}>VITE_SUPABASE_URL</code>
+          e
+          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--color-ice-100)', padding: '1px 5px', borderRadius: 3, margin: '0 4px' }}>VITE_SUPABASE_ANON_KEY</code>
+          nel file <code>.env.local</code> e ricompila il sito per abilitare la pubblicazione online.
+        </div>
+      </div>
+    );
+  }
   return (
     <div style={{ padding: '16px 20px', background: 'var(--color-teal-50)', border: '1px solid var(--color-teal-100)', borderRadius: 'var(--radius-md)', marginBottom: 20, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-      <AdminIcon name="info" size={18} color="var(--color-teal-500)" />
+      <AdminIcon name="cloud-upload" size={18} color="var(--color-teal-500)" />
       <div style={{ flex: 1, fontSize: 13, color: 'var(--color-teal-700)', lineHeight: 1.6 }}>
-        <b style={{ color: 'var(--color-teal-500)', fontFamily: 'var(--font-display)' }}>Come funziona.</b>{' '}
-        Ogni modifica è salvata automaticamente nel browser e visibile sul sito appena ricarichi la pagina.
-        I dati sono memorizzati localmente: questo significa che funzionano subito su questa macchina ma non vengono
-        sincronizzati su altri dispositivi. Per la produzione consigliamo di trasferire le modifiche al codice o
-        collegare un database — chiedi al tuo sviluppatore.
+        <b style={{ color: 'var(--color-teal-500)', fontFamily: 'var(--font-display)' }}>Pubblicazione automatica.</b>{' '}
+        Ogni modifica viene inviata a Supabase e diventa visibile a tutti i visitatori del sito appena ricaricano la pagina.
+        Lo stato della pubblicazione è indicato nell'angolo in alto a destra.
       </div>
     </div>
   );
@@ -723,38 +873,54 @@ function SocialEditor({ socials, onChange }) {
   );
 }
 
-function ImageSlotEditor({ slot, onChange }) {
+function ImageSlotEditor({ slot, content }) {
   const inputRef = useRef(null);
-  const key = `${IMAGE_KEY_PREFIX}${slot.id}`;
-  // Read current image to render preview. Re-read on render so we reflect changes.
-  let current = null;
-  try { current = localStorage.getItem(key) || null; } catch { /* */ }
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
+  const current = resolveImageSlot(content, slot.id);
 
-  const setImage = (dataUrl) => {
-    try { localStorage.setItem(key, dataUrl); } catch { alert('Immagine troppo grande per essere salvata. Prova con una versione più piccola.'); return; }
-    // Notify components that listen
-    try { window.dispatchEvent(new CustomEvent('cv-site-content-changed')); } catch { /* */ }
-    onChange?.();
-  };
-
-  const clearImage = () => {
-    try { localStorage.removeItem(key); } catch { /* */ }
-    try { window.dispatchEvent(new CustomEvent('cv-site-content-changed')); } catch { /* */ }
-    onChange?.();
-  };
-
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     if (!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (e) => setImage(e.target.result);
-    reader.readAsDataURL(file);
+    if (!isSupabaseConfigured) {
+      setErr('Supabase non configurato — impossibile caricare in cloud.');
+      return;
+    }
+    setBusy(true); setErr(null);
+    try {
+      // Delete the previous storage object if any.
+      if (current?.storage_path) {
+        await deleteLandingImage(current.storage_path).catch(() => {});
+      }
+      const uploaded = await uploadLandingImage(slot.id, file);
+      setSiteContent((c) => ({
+        ...c,
+        images: { ...(c.images || {}), [slot.id]: uploaded },
+      }));
+    } catch (e) {
+      setErr(e.message || 'Errore upload.');
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  const clearImage = async () => {
+    if (current?.storage_path) {
+      await deleteLandingImage(current.storage_path).catch(() => {});
+    }
+    setSiteContent((c) => ({
+      ...c,
+      images: { ...(c.images || {}), [slot.id]: null },
+    }));
+    // Also clear legacy localStorage fallback so it doesn't reappear.
+    try { localStorage.removeItem(`imgslot:${slot.id}`); } catch { /* */ }
   };
 
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: 14, display: 'flex', gap: 14 }}>
       <div style={{ width: 120, aspectRatio: '4/3', background: 'var(--color-ice-100)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, display: 'grid', placeItems: 'center', position: 'relative' }}>
         {current ? (
-          <img src={current} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={current.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <AdminIcon name="image" size={28} color="var(--fg-muted)" />
         )}
@@ -762,12 +928,20 @@ function ImageSlotEditor({ slot, onChange }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 500, color: 'var(--fg-primary)' }}>{slot.label}</div>
         <div style={{ fontSize: 11, color: 'var(--fg-muted)', lineHeight: 1.5 }}>{slot.desc}</div>
-        <div style={{ marginTop: 'auto', display: 'flex', gap: 6 }}>
+        {current?.legacy && (
+          <div style={{ fontSize: 10, color: 'var(--color-warning-500)', fontFamily: 'var(--font-mono)' }}>
+            Immagine locale legacy — ricarica per pubblicarla online.
+          </div>
+        )}
+        {err && (
+          <div style={{ fontSize: 11, color: 'var(--color-danger-500)' }}>{err}</div>
+        )}
+        <div style={{ marginTop: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFile(e.target.files?.[0])} />
-          <ABtn size="sm" variant="secondary" icon={<AdminIcon name="upload" size={12} />} onClick={() => inputRef.current?.click()}>
-            {current ? 'Sostituisci' : 'Carica'}
+          <ABtn size="sm" variant="secondary" icon={<AdminIcon name={busy ? 'loader' : 'upload'} size={12} />} onClick={() => inputRef.current?.click()} disabled={busy}>
+            {busy ? 'Carico…' : current ? 'Sostituisci' : 'Carica'}
           </ABtn>
-          {current && (
+          {current && !busy && (
             <ABtn size="sm" variant="ghost" icon={<AdminIcon name="trash-2" size={12} />} onClick={clearImage}>
               Rimuovi
             </ABtn>

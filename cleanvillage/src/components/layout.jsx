@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logo, Icon, Button, TrustBar, Eyebrow } from './ui.jsx';
 import { CV_CATEGORIES, CV_BRANDS } from '../data.js';
@@ -15,18 +15,19 @@ const SOCIAL_SVGS = {
 function MegaCategories({ onClose }) {
   const navigate = useNavigate();
   const cats = CV_CATEGORIES;
+  const go = (path) => { navigate(path); onClose(); };
   return (
     <div onMouseLeave={onClose}
       style={{ position: 'absolute', top: '100%', left: -32, right: -32, marginTop: 0, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderTop: 'none', boxShadow: 'var(--shadow-pop)', padding: '28px 32px 24px', zIndex: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
-        <Eyebrow>Tutte le categorie · 11</Eyebrow>
-        <a href="#" onClick={(e) => { e.preventDefault(); navigate('/catalog'); onClose(); }} style={{ fontSize: 12, color: 'var(--color-teal-500)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <Eyebrow>Tutte le categorie</Eyebrow>
+        <a href="/catalog" onClick={(e) => { e.preventDefault(); go('/catalog'); }} style={{ fontSize: 12, color: 'var(--color-teal-500)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
           Esplora tutto il catalogo <Icon name="arrow-right" size={12} />
         </a>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px 24px' }}>
         {cats.map(c => (
-          <a key={c.id} href="#" onClick={(e) => { e.preventDefault(); navigate('/catalog'); onClose(); }}
+          <a key={c.id} href={`/catalog?cat=${c.id}`} onClick={(e) => { e.preventDefault(); go(`/catalog?cat=${c.id}`); }}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 8px', textDecoration: 'none', color: 'var(--fg-primary)', borderRadius: 'var(--radius-xs)' }}>
             <span style={{ width: 28, height: 28, display: 'grid', placeItems: 'center', background: 'var(--color-ice-50)', color: 'var(--color-teal-500)', borderRadius: 'var(--radius-xs)', flexShrink: 0 }}>
               <Icon name={c.icon} size={14} />
@@ -43,14 +44,16 @@ function MegaCategories({ onClose }) {
 }
 
 function MegaBrands({ onClose }) {
+  const navigate = useNavigate();
   const brands = CV_BRANDS;
+  const go = (b) => { navigate(`/catalog?brand=${encodeURIComponent(b.name)}`); onClose(); };
   return (
     <div onMouseLeave={onClose}
       style={{ position: 'absolute', top: '100%', left: -32, right: -32, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderTop: 'none', boxShadow: 'var(--shadow-pop)', padding: '28px 32px 26px', zIndex: 20 }}>
-      <Eyebrow>Marchi distribuiti · 24</Eyebrow>
+      <Eyebrow>Marchi distribuiti</Eyebrow>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginTop: 14 }}>
         {brands.map(b => (
-          <a key={b.name} href="#" onClick={e => e.preventDefault()}
+          <a key={b.name} href={`/catalog?brand=${encodeURIComponent(b.name)}`} onClick={(e) => { e.preventDefault(); go(b); }}
             style={{ display: 'grid', placeItems: 'center', height: 60, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xs)', textDecoration: 'none', background: 'var(--bg-surface)' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: b.weight || 500, fontSize: 14, color: 'var(--fg-primary)', letterSpacing: b.letter || '0', fontStyle: b.italic ? 'italic' : 'normal' }}>{b.name}</span>
           </a>
@@ -67,7 +70,7 @@ function MobileDrawer({ onClose }) {
   const go = (path) => { navigate(path); onClose(); };
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40, touchAction: 'none' }} aria-hidden="true" />
       <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '88vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
           <Logo size="md" />
@@ -79,7 +82,7 @@ function MobileDrawer({ onClose }) {
           <MobileNavItem label="Categorie" icon="grid" onToggle={() => setSection(s => s === 'cat' ? null : 'cat')} open={section === 'cat'}>
             <div style={{ padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
               {CV_CATEGORIES.map(c => (
-                <button key={c.id} onClick={() => go('/catalog')} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
+                <button key={c.id} onClick={() => go(`/catalog?cat=${c.id}`)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
                   <span style={{ width: 28, height: 28, display: 'grid', placeItems: 'center', background: 'var(--color-ice-50)', color: 'var(--color-teal-500)', borderRadius: 'var(--radius-xs)', flexShrink: 0 }}>
                     <Icon name={c.icon} size={13} />
                   </span>
@@ -91,17 +94,20 @@ function MobileDrawer({ onClose }) {
           <MobileNavItem label="Marchi" icon="tag" onToggle={() => setSection(s => s === 'brand' ? null : 'brand')} open={section === 'brand'}>
             <div style={{ padding: '8px 20px 16px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {CV_BRANDS.map(b => (
-                <span key={b.name} style={{ padding: '6px 12px', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: b.weight || 500 }}>{b.name}</span>
+                <button key={b.name} onClick={() => go(`/catalog?brand=${encodeURIComponent(b.name)}`)} style={{ padding: '6px 12px', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: b.weight || 500, background: 'var(--bg-surface)', cursor: 'pointer', color: 'var(--fg-primary)' }}>{b.name}</button>
               ))}
             </div>
           </MobileNavItem>
           <button onClick={() => go('/contact')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
             <Icon name="mail" size={18} /> Contatti
           </button>
-          <button onClick={() => go('/')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+          <button onClick={() => go('/video-aziendale')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
             <Icon name="play" size={18} /> Video Aziendale
           </button>
-          <button onClick={() => go('/')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+          <button onClick={() => go('/servizi')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
+            <Icon name="wrench" size={18} /> Servizi
+          </button>
+          <button onClick={() => go('/azienda')} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'none', border: 'none', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--fg-primary)' }}>
             <Icon name="info" size={18} /> Azienda
           </button>
         </div>
@@ -131,16 +137,38 @@ function MobileNavItem({ label, icon, onToggle, open, children }) {
 export function Header() {
   const [open, setOpen] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const content = useSiteContent();
 
+  // Mobile drawer scroll-lock and ESC-to-close (block 5).
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => { if (e.key === 'Escape') setDrawerOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [drawerOpen]);
+
+  const submitSearch = (e) => {
+    e.preventDefault();
+    const q = search.trim();
+    if (!q) { navigate('/catalog'); return; }
+    navigate(`/catalog?q=${encodeURIComponent(q)}`);
+  };
+
   const NAV = [
     { id: 'cat', label: 'Categorie', has: true },
     { id: 'brand', label: 'Marchi', has: true },
-    { id: 'contact', label: 'Contatti' },
-    { id: 'video', label: 'Video Aziendale' },
-    { id: 'about', label: 'Azienda' },
+    { id: 'contact', label: 'Contatti', path: '/contact' },
+    { id: 'video', label: 'Video Aziendale', path: '/video-aziendale' },
+    { id: 'services', label: 'Servizi', path: '/servizi' },
+    { id: 'about', label: 'Azienda', path: '/azienda' },
   ];
 
   return (
@@ -159,8 +187,8 @@ export function Header() {
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="clock" size={11} /> {content.company.hours}</span>
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>{content.utility.salesTerms}</a>
-              <a href="#" onClick={e => e.preventDefault()} style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>{content.utility.warrantyTerms}</a>
+              <Link to="/condizioni-vendita" style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>{content.utility.salesTerms}</Link>
+              <Link to="/garanzia" style={{ color: 'var(--fg-muted)', textDecoration: 'none' }}>{content.utility.warrantyTerms}</Link>
               <Link to="/admin" style={{ color: 'var(--color-teal-500)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}><Icon name="lock" size={11} /> {content.utility.tradeArea}</Link>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="globe" size={11} /> IT</span>
             </span>
@@ -179,10 +207,7 @@ export function Header() {
               <button key={n.id}
                 onMouseEnter={() => n.has ? setOpen(n.id) : setOpen(null)}
                 onClick={() => {
-                  if (!n.has) {
-                    if (n.id === 'contact') navigate('/contact');
-                    else navigate('/');
-                  }
+                  if (n.path) navigate(n.path);
                 }}
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer',
@@ -203,11 +228,14 @@ export function Header() {
         <span style={{ flex: 1 }} />
 
         {!isMobile && (
-          <div style={{ position: 'relative', width: 260 }}>
+          <form onSubmit={submitSearch} style={{ position: 'relative', width: 260 }}>
             <Icon name="search" size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-muted)' }} />
-            <input placeholder="Cerca prodotti, codici, marchi…"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-50)', border: '1px solid transparent', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--fg-primary)' }} />
-          </div>
+            <input
+              value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cerca prodotti, codici, marchi…"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-50)', border: '1px solid transparent', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--fg-primary)' }}
+            />
+          </form>
         )}
 
         {!isMobile && (
@@ -218,11 +246,16 @@ export function Header() {
 
         {isMobile ? (
           <>
-            <button onClick={() => navigate('/contact')} style={{ height: 40, padding: '0 14px', background: 'var(--cta-bg)', color: 'var(--color-white)', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <button onClick={() => navigate('/contact')} style={{ height: 44, padding: '0 14px', background: 'var(--cta-bg)', color: 'var(--color-white)', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
               Preventivo
             </button>
-            <button onClick={() => setDrawerOpen(true)} style={{ width: 40, height: 40, background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--fg-primary)', flexShrink: 0 }}>
-              <Icon name="menu" size={20} />
+            <button
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Apri menu"
+              aria-expanded={drawerOpen}
+              style={{ width: 48, height: 48, background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--fg-primary)', flexShrink: 0 }}
+            >
+              <Icon name="menu" size={22} />
             </button>
           </>
         ) : (
@@ -237,6 +270,7 @@ export function Header() {
 
 export function Footer() {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const content = useSiteContent();
   const co = content.company;
   const directions = buildDirectionsUrl(co.operationalAddress);
@@ -246,17 +280,27 @@ export function Footer() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>{children}</div>
     </div>
   );
-  const Lk = ({ children, href = '#', external }) => (
-    <a
-      href={href}
-      onClick={href === '#' ? (e => e.preventDefault()) : undefined}
-      target={external ? '_blank' : undefined}
-      rel={external ? 'noopener noreferrer' : undefined}
-      style={{ fontSize: 13, color: 'var(--color-teal-100)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-    >
-      {children}
-    </a>
-  );
+  const isExternalHref = (h) => !!h && (/^(https?:|mailto:|tel:)/.test(h));
+  const Lk = ({ children, href = '#', external }) => {
+    const ext = external || isExternalHref(href);
+    return (
+      <a
+        href={href}
+        onClick={(e) => {
+          if (href === '#' || !href) { e.preventDefault(); return; }
+          if (ext) return; // let browser handle external/mailto/tel
+          e.preventDefault();
+          navigate(href);
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        }}
+        target={ext && !href.startsWith('mailto:') && !href.startsWith('tel:') ? '_blank' : undefined}
+        rel={ext && !href.startsWith('mailto:') && !href.startsWith('tel:') ? 'noopener noreferrer' : undefined}
+        style={{ fontSize: 13, color: 'var(--color-teal-100)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+      >
+        {children}
+      </a>
+    );
+  };
   return (
     <footer style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', marginTop: 'auto', position: 'relative' }}>
       <TrustBar height={3} />
@@ -286,19 +330,19 @@ export function Footer() {
             </div>
           </div>
           <Col title="Categorie">
-            <Lk>Lavasciuga</Lk>
-            <Lk>Idropulitrici</Lk>
-            <Lk>Detergenti</Lk>
-            <Lk>Carrelli</Lk>
-            <Lk>Carta &amp; igiene</Lk>
-            <Lk>Catalogo completo &rarr;</Lk>
+            <Lk href="/catalog?cat=lavasciuga">Lavasciuga</Lk>
+            <Lk href="/catalog?cat=idro">Idropulitrici</Lk>
+            <Lk href="/catalog?cat=detergenti">Detergenti</Lk>
+            <Lk href="/catalog?cat=carrelli">Carrelli</Lk>
+            <Lk href="/catalog?cat=carta">Carta &amp; igiene</Lk>
+            <Lk href="/catalog">Catalogo completo &rarr;</Lk>
           </Col>
           <Col title="Servizi">
-            <Lk>Preventivi</Lk>
-            <Lk>Sede operativa</Lk>
-            <Lk>Assistenza</Lk>
-            <Lk>Noleggio</Lk>
-            <Lk>Formazione</Lk>
+            <Lk href="/contact">Preventivi</Lk>
+            <Lk href="/azienda">Azienda</Lk>
+            <Lk href="/servizi#assistenza">Assistenza</Lk>
+            <Lk href="/servizi#noleggio">Noleggio</Lk>
+            <Lk href="/servizi#formazione">Formazione</Lk>
           </Col>
           {!isMobile && (
             <Col title="Contatti">
@@ -320,9 +364,9 @@ export function Footer() {
         <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--color-teal-700)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-100)', opacity: 0.85, gap: 12 }}>
           <span>© {new Date().getFullYear()} {co.name} · P.IVA {co.vat} · REA {co.rea} · Cap. Soc. {co.capSoc}</span>
           <span style={{ display: 'inline-flex', gap: 18 }}>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>Cookie</a>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>Termini</a>
+            <Link to="/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</Link>
+            <Link to="/cookie" style={{ color: 'inherit', textDecoration: 'none' }}>Cookie</Link>
+            <Link to="/termini" style={{ color: 'inherit', textDecoration: 'none' }}>Termini</Link>
           </span>
         </div>
       </div>

@@ -283,3 +283,39 @@ export async function updateQuoteStatus(id, status) {
   const { error } = await supabase.from('quotes').update({ status }).eq('id', id);
   if (error) throw error;
 }
+
+// --------------------------------------------------------------
+// SITE CONTENT (landing CMS)
+// --------------------------------------------------------------
+export async function getSiteContent() {
+  if (!isSupabaseConfigured) return null;
+  const { data, error } = await supabase
+    .from('site_content').select('data').eq('id', 1).maybeSingle();
+  if (error) throw error;
+  return data?.data || null;
+}
+
+export async function upsertSiteContent(payload) {
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  const { error } = await supabase
+    .from('site_content')
+    .upsert({ id: 1, data: payload, updated_at: new Date().toISOString() });
+  if (error) throw error;
+}
+
+export async function uploadLandingImage(slotId, file) {
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  const safeSlot = String(slotId).replace(/[^a-zA-Z0-9_-]/g, '_');
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${safeSlot}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from('landing-images').upload(path, file, { contentType: file.type, upsert: false });
+  if (upErr) throw upErr;
+  const { data: pub } = supabase.storage.from('landing-images').getPublicUrl(path);
+  return { url: pub.publicUrl, storage_path: path };
+}
+
+export async function deleteLandingImage(storagePath) {
+  if (!isSupabaseConfigured || !storagePath) return;
+  await supabase.storage.from('landing-images').remove([storagePath]);
+}

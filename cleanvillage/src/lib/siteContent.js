@@ -1,11 +1,27 @@
 // Centralised, editable copy + images for the public site.
-// Persisted to localStorage so non-developers can edit everything from
-// /admin/landing without redeploying code. Falls back to the defaults below.
+//
+// Two-tier persistence:
+// - Source of truth: Supabase `site_content` (singleton row id=1, JSONB)
+//   so all visitors see the same up-to-date content.
+// - Local cache: localStorage so the UI stays snappy and works offline.
+//
+// On first mount we fetch from Supabase, merge with the defaults, and warm
+// the local cache. Every write goes to both: cache (immediate re-render)
+// plus a remote upsert (so changes propagate to all visitors).
+//
+// Images are stored as `{ url, storage_path }` objects so the editor can
+// later delete the underlying Supabase Storage object.
 
 import { useEffect, useState, useCallback } from 'react';
+import {
+  getSiteContent as fetchRemote,
+  upsertSiteContent as pushRemote,
+} from './api.js';
+import { isSupabaseConfigured } from './supabase.js';
 
 const STORAGE_KEY = 'cv:site-content:v1';
 const EVENT_NAME = 'cv-site-content-changed';
+const REMOTE_STATUS_EVENT = 'cv-site-content-remote-status';
 
 export const DEFAULT_CONTENT = {
   company: {
@@ -43,8 +59,6 @@ export const DEFAULT_CONTENT = {
     eyebrow: 'Pulizia industriale & forniture B2B · Villaricca (NA)',
     titleHuman: "Macchinari e forniture per chi pulisce di mestiere.",
     titleHumanAccent: 'pulisce di mestiere',
-    titleTechnical: '500+ SKU. 24 marchi. Un solo fornitore.',
-    titleTechnicalAccent: 'Un solo fornitore.',
     subtitle:
       "Quarant'anni di forniture per imprese di pulizia, fabbriche e strutture in tutta Italia. Oltre 500 codici a magazzino, 24 marchi, preventivo entro 24 ore.",
     ctaPrimary: 'Richiedi un Preventivo',
@@ -228,19 +242,172 @@ export const DEFAULT_CONTENT = {
       'Inviando confermi le nostre condizioni di vendita. Risposta entro 1 giorno lavorativo.',
   },
   images: {
-    // Slot ids referenced from Landing/Contact/Header
-    heroImage: '',
-    'hm-comac-innova': '',
-    'hm-karcher-hd': '',
-    'hm-ghibli-vac': '',
-    videoPoster: '',
-    hqMap: '',
+    // Each slot can be either null or { url, storage_path }.
+    heroImage: null,
+    'hm-comac-innova': null,
+    'hm-karcher-hd': null,
+    'hm-ghibli-vac': null,
+    videoPoster: null,
+    hqMap: null,
+  },
+  // Pagine istituzionali — testi modificabili dall'editor.
+  legalPages: {
+    salesTerms: {
+      title: 'Condizioni generali di vendita',
+      subtitle:
+        'Termini, modalità di pagamento e clausole che regolano i nostri rapporti commerciali B2B.',
+      sections: [
+        { heading: '1. Oggetto', paragraphs: [
+          "Le presenti condizioni si applicano a tutte le forniture di Clean Village Srl verso clienti professionali (P.IVA o codice fiscale d'impresa)."
+        ] },
+        { heading: '2. Ordini e conferme', paragraphs: [
+          "L'ordine si intende perfezionato con la conferma scritta da parte del nostro ufficio commerciale. Le quantità, i prezzi e i tempi indicati nei preventivi hanno validità 30 giorni salvo diversa indicazione."
+        ] },
+        { heading: '3. Prezzi e pagamenti', paragraphs: [
+          "I prezzi sono espressi in euro, IVA esclusa, franco nostro magazzino di Villaricca (NA). Le condizioni di pagamento concordate sono indicate in conferma d'ordine. In caso di ritardo si applicano gli interessi di mora ai sensi del D.Lgs. 231/2002."
+        ] },
+        { heading: '4. Consegna', paragraphs: [
+          "I tempi di consegna sono indicativi e decorrono dalla conferma d'ordine. Eventuali ritardi non danno diritto a risarcimenti. La merce viaggia a rischio del destinatario."
+        ] },
+        { heading: '5. Garanzia e reclami', paragraphs: [
+          "La garanzia ha durata 24 mesi dalla data di consegna, salvo diversa indicazione del produttore. Eventuali difetti vanno segnalati per iscritto entro 8 giorni dalla scoperta."
+        ] },
+        { heading: '6. Foro competente', paragraphs: [
+          "Per ogni controversia è competente in via esclusiva il Foro di Napoli Nord."
+        ] },
+      ],
+    },
+    warranty: {
+      title: 'Condizioni di garanzia',
+      subtitle:
+        "Cosa copriamo, per quanto tempo, e come attivare l'assistenza tecnica.",
+      sections: [
+        { heading: 'Durata', paragraphs: [
+          "Tutte le macchine vendute sono coperte da garanzia secondo i termini del produttore (di norma 12 o 24 mesi), che decorrono dalla data di consegna documentata.",
+        ] },
+        { heading: 'Cosa copre', paragraphs: [
+          "La garanzia copre i difetti di fabbricazione e i guasti riconducibili a vizi del materiale. Sono esclusi: usura normale (spazzole, filtri, ruote), danni da uso improprio, manomissioni e mancata manutenzione.",
+        ] },
+        { heading: 'Come attivarla', paragraphs: [
+          "Per aprire una pratica di garanzia, contattare il nostro service all'indirizzo email principale indicando matricola macchina, fattura d'acquisto e descrizione del guasto. La nostra officina autorizzata interviene entro 48 ore lavorative per i clienti con contratto attivo.",
+        ] },
+      ],
+    },
+    privacy: {
+      title: 'Informativa privacy',
+      subtitle:
+        "Come trattiamo i tuoi dati personali, ai sensi del Regolamento UE 2016/679 (GDPR).",
+      sections: [
+        { heading: 'Titolare del trattamento', paragraphs: [
+          "Clean Village Srl, Via Sacerdote Giovanni Giuseppe Pirozzi, 3 — 80010 Villaricca (NA), P.IVA 06731021215. Contatto: direzione.cleanvillage@gmail.com.",
+        ] },
+        { heading: 'Dati raccolti', paragraphs: [
+          "Raccogliamo i dati che ci fornisci compilando i nostri form (nome, ragione sociale, P.IVA, email, telefono, descrizione richiesta) e i log tecnici di navigazione necessari al funzionamento del sito.",
+        ] },
+        { heading: 'Finalità', paragraphs: [
+          "I dati sono utilizzati per rispondere alle richieste di preventivo, gestire il rapporto commerciale, adempiere obblighi di legge (fatturazione, conservazione documentale) e — solo previo consenso — inviare comunicazioni commerciali.",
+        ] },
+        { heading: 'Conservazione', paragraphs: [
+          "I dati commerciali sono conservati per la durata del rapporto e per i 10 anni successivi previsti dalla normativa fiscale. I dati di marketing sono conservati fino a revoca del consenso.",
+        ] },
+        { heading: 'Diritti dell\'interessato', paragraphs: [
+          "Hai diritto di accesso, rettifica, cancellazione, limitazione, portabilità e opposizione. Per esercitarli scrivici a direzione.cleanvillage@gmail.com. Hai inoltre diritto di reclamo all'Autorità Garante (www.garanteprivacy.it).",
+        ] },
+      ],
+    },
+    cookie: {
+      title: 'Cookie policy',
+      subtitle: 'Quali cookie utilizziamo e come gestire le preferenze.',
+      sections: [
+        { heading: 'Cookie tecnici', paragraphs: [
+          "Utilizziamo cookie tecnici strettamente necessari al funzionamento del sito (sessione, preferenze di visualizzazione). Non richiedono consenso preventivo.",
+        ] },
+        { heading: 'Cookie di terze parti', paragraphs: [
+          "La mappa Google Maps integrata nella pagina contatti rilascia cookie da parte di Google. Per disattivarli, modifica le impostazioni del tuo browser o consulta la privacy policy di Google.",
+        ] },
+        { heading: 'Gestione consensi', paragraphs: [
+          "Puoi modificare in qualsiasi momento le preferenze cookie dalle impostazioni del browser o cancellando i cookie già memorizzati.",
+        ] },
+      ],
+    },
+    terms: {
+      title: 'Termini e condizioni d\'uso',
+      subtitle: "Condizioni che regolano la navigazione e l'utilizzo di questo sito.",
+      sections: [
+        { heading: 'Proprietà dei contenuti', paragraphs: [
+          "Tutti i contenuti del sito (testi, immagini, marchi) sono di proprietà di Clean Village Srl o dei rispettivi titolari. Ogni uso non autorizzato è vietato.",
+        ] },
+        { heading: 'Limitazione di responsabilità', paragraphs: [
+          "Le informazioni di prodotto, prezzi e disponibilità riportati nel catalogo sono indicativi e non costituiscono offerta vincolante. Per condizioni vincolanti fare riferimento al preventivo ufficiale.",
+        ] },
+        { heading: 'Link esterni', paragraphs: [
+          "Il sito può contenere link a siti di terzi: non siamo responsabili dei contenuti, della disponibilità o delle politiche privacy di tali siti.",
+        ] },
+      ],
+    },
+  },
+  // Pagine non-legali ma ancora editabili: Azienda, Servizi, Video.
+  pages: {
+    about: {
+      eyebrow: 'Chi siamo',
+      title: "Clean Village. Forniture per chi pulisce di mestiere dal 1985.",
+      intro:
+        "Siamo un'azienda familiare con sede a Villaricca, in provincia di Napoli, specializzata nella distribuzione di macchinari e prodotti per la pulizia industriale e civile. Da quarant'anni serviamo imprese di pulizia, industrie, GDO, sanità, hotel e ristorazione in tutta Italia.",
+      values: [
+        { icon: 'truck', title: 'Consegne rapide', desc: "Magazzino sempre rifornito di oltre 500 SKU. Spedizioni in 24-48 ore sulla maggior parte del territorio nazionale." },
+        { icon: 'wrench', title: 'Service autorizzato', desc: 'Officina autorizzata per i principali marchi (Comac, Nilfisk, Hako, Tennant). Ricambi originali in pronta consegna.' },
+        { icon: 'graduation-cap', title: 'Formazione tecnica', desc: "Corsi di formazione su uso macchine, HACCP, sicurezza DPI per operatori e responsabili." },
+        { icon: 'badge-check', title: 'Certificazioni ISO', desc: 'Sistema qualità ISO 9001, ambiente ISO 14001, sicurezza sul lavoro ISO 45001.' },
+      ],
+    },
+    services: {
+      eyebrow: 'Cosa facciamo',
+      title: 'Servizi a 360° per la pulizia professionale.',
+      intro:
+        "Non vendiamo solo prodotti: offriamo un servizio completo che parte dalla consulenza tecnica e arriva fino all'assistenza post-vendita.",
+      items: [
+        {
+          id: 'assistenza',
+          icon: 'wrench',
+          title: 'Assistenza tecnica',
+          desc: "Officina interna autorizzata Comac, Nilfisk, Hako, Tennant. Interventi su appuntamento entro 48 ore per i clienti con contratto attivo. Ricambi originali sempre disponibili.",
+        },
+        {
+          id: 'noleggio',
+          icon: 'calendar',
+          title: 'Noleggio macchine',
+          desc: "Soluzioni di noleggio a breve e lungo termine per coprire picchi di lavoro, cantieri temporanei o per valutare una macchina prima dell'acquisto. Manutenzione inclusa.",
+        },
+        {
+          id: 'formazione',
+          icon: 'graduation-cap',
+          title: 'Formazione e corsi',
+          desc: "Accademia Clean Village dal 2018: corsi su uso sicuro delle macchine, HACCP, detergenti professionali, gare d'appalto. In aula a Villaricca o presso la tua sede.",
+        },
+        {
+          id: 'preventivi',
+          icon: 'file-text',
+          title: 'Preventivi su misura',
+          desc: "Il nostro team commerciale risponde entro 24 ore lavorative con disponibilità di stock, prezzo a scaglioni e tempi di consegna confermati.",
+        },
+      ],
+    },
+    videoPage: {
+      eyebrow: 'Video aziendale',
+      title: 'Dentro alla nostra sede operativa.',
+      intro:
+        "Un tour del nostro magazzino, dell'area showroom e dell'officina autorizzata a Villaricca (NA). Tutto quello che serve al tuo lavoro, sotto un solo tetto.",
+      embedTitle: 'CleanVillage HQ tour',
+      embedUrl: '',
+      cta: 'Prenota una visita',
+    },
   },
 };
 
 // --- Persistence helpers --------------------------------------------------
 function safeGet() {
   try {
+    if (typeof localStorage === 'undefined') return null;
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
@@ -251,16 +418,30 @@ function safeGet() {
 
 function safeSet(value) {
   try {
+    if (typeof localStorage === 'undefined') return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
   } catch {
     /* quota or unavailable */
   }
 }
 
+function notifyChange() {
+  try { window.dispatchEvent(new CustomEvent(EVENT_NAME)); } catch { /* */ }
+}
+
+function emitRemoteStatus(status, error) {
+  try {
+    window.dispatchEvent(new CustomEvent(REMOTE_STATUS_EVENT, {
+      detail: { status, error: error?.message || null, at: Date.now() },
+    }));
+  } catch { /* */ }
+}
+
 // Recursively merge stored values onto defaults so a missing key in storage
 // still falls back to the default copy.
 function deepMerge(target, source) {
-  if (!source || typeof source !== 'object' || Array.isArray(source)) return source ?? target;
+  if (source === null || source === undefined) return target;
+  if (typeof source !== 'object' || Array.isArray(source)) return source;
   const out = Array.isArray(target) ? [...target] : { ...target };
   for (const key of Object.keys(source)) {
     const t = out[key];
@@ -280,27 +461,70 @@ export function getSiteContent() {
   return deepMerge(DEFAULT_CONTENT, safeGet());
 }
 
-export function setSiteContent(updater) {
+let remotePromise = null;
+let remoteLoaded = false;
+
+// Pull the latest content from Supabase and warm the local cache.
+export function loadFromRemote(force = false) {
+  if (!isSupabaseConfigured) return Promise.resolve(null);
+  if (!force && remotePromise) return remotePromise;
+  remotePromise = fetchRemote()
+    .then((remote) => {
+      remoteLoaded = true;
+      if (remote && typeof remote === 'object') {
+        const merged = deepMerge(DEFAULT_CONTENT, remote);
+        safeSet(merged);
+        notifyChange();
+        return merged;
+      }
+      return null;
+    })
+    .catch((err) => {
+      console.error('[siteContent] remote fetch failed', err);
+      remotePromise = null;
+      return null;
+    });
+  return remotePromise;
+}
+
+// Apply edits locally + push to Supabase. Local update is synchronous so the
+// UI reflects the change immediately; the remote upsert is fire-and-forget.
+export function setSiteContent(updater, { remote = true } = {}) {
   const current = getSiteContent();
   const next = typeof updater === 'function' ? updater(current) : { ...current, ...updater };
   safeSet(next);
-  try {
-    window.dispatchEvent(new CustomEvent(EVENT_NAME));
-  } catch {
-    /* ignore */
+  notifyChange();
+  if (remote && isSupabaseConfigured) {
+    emitRemoteStatus('saving');
+    pushRemote(next)
+      .then(() => emitRemoteStatus('saved'))
+      .catch((err) => {
+        console.error('[siteContent] remote push failed', err);
+        emitRemoteStatus('error', err);
+      });
+  } else if (remote) {
+    emitRemoteStatus('local-only');
   }
   return next;
 }
 
-export function resetSiteContent() {
+export function resetSiteContent({ remote = true } = {}) {
   try { localStorage.removeItem(STORAGE_KEY); } catch { /* */ }
-  try { window.dispatchEvent(new CustomEvent(EVENT_NAME)); } catch { /* */ }
+  notifyChange();
+  if (remote && isSupabaseConfigured) {
+    emitRemoteStatus('saving');
+    pushRemote({}).then(() => emitRemoteStatus('saved')).catch((err) => emitRemoteStatus('error', err));
+  } else if (remote) {
+    emitRemoteStatus('local-only');
+  }
 }
 
 // --- React hooks ----------------------------------------------------------
 export function useSiteContent() {
   const [content, setContent] = useState(() => getSiteContent());
   useEffect(() => {
+    // Trigger remote load once (module-level guard).
+    if (!remoteLoaded && isSupabaseConfigured) loadFromRemote();
     const handler = () => setContent(getSiteContent());
     window.addEventListener(EVENT_NAME, handler);
     window.addEventListener('storage', handler);
@@ -310,6 +534,18 @@ export function useSiteContent() {
     };
   }, []);
   return content;
+}
+
+// Hook returning the last remote save status: { status, error, at } where
+// status is one of: idle | saving | saved | error | local-only.
+export function useRemoteSaveStatus() {
+  const [state, setState] = useState({ status: isSupabaseConfigured ? 'idle' : 'local-only', error: null, at: null });
+  useEffect(() => {
+    const handler = (e) => setState(e.detail);
+    window.addEventListener(REMOTE_STATUS_EVENT, handler);
+    return () => window.removeEventListener(REMOTE_STATUS_EVENT, handler);
+  }, []);
+  return state;
 }
 
 export function useEditSiteContent() {
@@ -328,6 +564,19 @@ export function useEditSiteContent() {
     });
   }, []);
   return update;
+}
+
+// Read an image slot: returns { url } (or null). Accepts both the new
+// `{ url, storage_path }` object and the legacy localStorage data-URI fallback.
+export function resolveImageSlot(content, slotId) {
+  const v = content?.images?.[slotId];
+  if (v && typeof v === 'object' && v.url) return v;
+  if (typeof v === 'string' && v) return { url: v };
+  try {
+    const legacy = localStorage.getItem(`imgslot:${slotId}`);
+    if (legacy) return { url: legacy, legacy: true };
+  } catch { /* */ }
+  return null;
 }
 
 // Helper for building a Google Maps directions URL to a given address.

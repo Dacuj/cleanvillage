@@ -1,21 +1,18 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, Button, TrustBar, Eyebrow, Spec } from '../components/ui.jsx';
 import { ProductCard, ProductIllustration } from '../components/product.jsx';
 import { ImageSlot } from '../components/ImageSlot.jsx';
-import { TweaksContext } from '../components/TweaksPanel.jsx';
 import { useCategories, useBrands, useProducts, useCourses, useIndustries } from '../lib/storefront.js';
 import { useIsMobile } from '../lib/useBreakpoint.js';
 import { useSiteContent } from '../lib/siteContent.js';
 
 export default function Landing() {
-  const tweaks = useContext(TweaksContext) || {};
-  const navigate = useNavigate();
   return (
     <main>
-      <Hero tweaks={tweaks} />
-      {tweaks.showMarquee !== false && <BrandMarquee />}
-      <CategoryShowcase tweaks={tweaks} />
+      <Hero />
+      <BrandMarquee />
+      <CategoryShowcase />
       <PromoStrip />
       <HighlightedMachines />
       <IndustriesGrid />
@@ -27,18 +24,16 @@ export default function Landing() {
   );
 }
 
-function Hero({ tweaks }) {
+function Hero() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const content = useSiteContent();
   const hero = content.hero;
-  const tone = tweaks?.headlineTone || 'human';
 
-  // Render the title with the accent word in teal.
+  // Render the title with the accent word coloured.
   const renderTitle = () => {
-    const isTech = tone === 'technical';
-    const full = isTech ? hero.titleTechnical : hero.titleHuman;
-    const accent = isTech ? hero.titleTechnicalAccent : hero.titleHumanAccent;
+    const full = hero.titleHuman;
+    const accent = hero.titleHumanAccent;
     if (!accent || !full.includes(accent)) return full;
     const [before, after] = full.split(accent);
     return (
@@ -194,13 +189,14 @@ function HeroVisual({ hero }) {
 function BrandMarquee() {
   const brands = useBrands();
   const content = useSiteContent();
+  const navigate = useNavigate();
   const items = [...brands, ...brands];
   return (
     <section style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)', padding: '28px 0 32px', marginTop: 48 }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 28, marginBottom: 18 }}>
         <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-muted)', whiteSpace: 'nowrap' }}>{content.brandMarquee.label}</span>
         <span style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
-        <a href="#" onClick={e => e.preventDefault()} style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-teal-500)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <a href="/catalog" onClick={(e) => { e.preventDefault(); navigate('/catalog'); }} style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-teal-500)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
           {content.brandMarquee.cta} <Icon name="arrow-right" size={12} />
         </a>
       </div>
@@ -215,13 +211,13 @@ function BrandMarquee() {
   );
 }
 
-function CategoryShowcase({ tweaks }) {
+function CategoryShowcase() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const cats = useCategories();
   const content = useSiteContent();
   const section = content.categoriesSection;
-  const style = tweaks?.categoryStyle || 'magazine';
+  const style = 'magazine';
   return (
     <section style={{ padding: isMobile ? '64px 20px 48px' : '112px 32px 96px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
@@ -577,8 +573,9 @@ function IndustriesGrid() {
 
 function IndustryCard({ ind, index }) {
   const [hover, setHover] = useState(false);
+  const navigate = useNavigate();
   return (
-    <a href="#" onClick={e => e.preventDefault()}
+    <a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{ textDecoration: 'none', color: 'inherit' }}>
       <div style={{
@@ -755,10 +752,11 @@ function FormStat({ value, label }) {
 
 function CourseCard({ c, index }) {
   const [hover, setHover] = useState(false);
+  const navigate = useNavigate();
   const levelColor = c.level === 'Base' ? 'var(--color-mint-500)' :
     c.level === 'Avanzato' ? 'var(--color-teal-500)' : 'var(--color-warning-500)';
   return (
-    <a href="#" onClick={e => e.preventDefault()}
+    <a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{ textDecoration: 'none', color: 'inherit' }}>
       <div style={{
