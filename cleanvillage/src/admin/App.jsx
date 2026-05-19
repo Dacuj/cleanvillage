@@ -6,6 +6,7 @@ import AdminVideos from './Videos.jsx';
 import AdminCategories from './Categories.jsx';
 import AdminBrands from './Brands.jsx';
 import AdminQuotes from './Quotes.jsx';
+import AdminHighlights from './Highlights.jsx';
 import Placeholder from './Placeholder.jsx';
 import AdminLogin from './Login.jsx';
 import { useAuth } from '../lib/auth.jsx';
@@ -44,6 +45,7 @@ export default function AdminApp() {
         <Route path="/categories" element={<AdminCategories />} />
         <Route path="/brands" element={<AdminBrands />} />
         <Route path="/quotes" element={<AdminQuotes />} />
+        <Route path="/highlights" element={<AdminHighlights />} />
         <Route path="/:section" element={<PlaceholderRoute />} />
       </Routes>
     </AdminShell>

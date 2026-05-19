@@ -65,8 +65,8 @@ function MobileDrawer({ onClose }) {
   const go = (path) => { navigate(path); onClose(); };
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
-      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '85vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 110 }} />
+      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '85vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 120, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
           <Logo size="md" />
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, color: 'var(--fg-secondary)' }}>
@@ -139,7 +139,14 @@ export function Header() {
   ];
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(255,255,255,0.92)', borderBottom: '1px solid var(--border-subtle)', backdropFilter: 'blur(10px)' }}>
+    <header style={{
+      position: 'sticky', top: 0, zIndex: 100,
+      background: isMobile ? 'var(--bg-surface)' : 'rgba(255,255,255,0.96)',
+      borderBottom: '1px solid var(--border-subtle)',
+      backdropFilter: isMobile ? 'none' : 'blur(10px)',
+      WebkitBackdropFilter: isMobile ? 'none' : 'blur(10px)',
+      boxShadow: isMobile ? '0 1px 3px rgba(15,35,48,0.06)' : 'none',
+    }}>
       {/* utility strip - desktop only */}
       {!isMobile && (
         <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--color-ice-50)' }}>

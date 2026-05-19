@@ -81,8 +81,8 @@ export default function Catalog() {
 
         {isMobile && sidebarOpen && (
           <>
-            <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
-            <div style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '85vw', maxWidth: 320, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', padding: '20px' }}>
+            <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 110 }} />
+            <div style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '85vw', maxWidth: 320, background: 'var(--bg-surface)', zIndex: 120, overflowY: 'auto', padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <span style={{ fontWeight: 600, fontSize: 16 }}>Filtri</span>
                 <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}><Icon name="x" size={20} /></button>

@@ -60,7 +60,7 @@ function AdminSidebar({ page }) {
     {
       label: 'Contenuti landing', items: [
         { id: 'videos', icon: 'video', label: 'Video', path: '/admin/videos' },
-        { id: 'highlights', icon: 'star', label: 'Macchine in evidenza', path: '/admin/highlights' },
+        { id: 'highlights', icon: 'image', label: 'Immagini landing', path: '/admin/highlights' },
         { id: 'promos', icon: 'megaphone', label: 'Promozioni', path: '/admin/promos' },
         { id: 'courses', icon: 'graduation-cap', label: 'Corsi & formazione', path: '/admin/courses' },
       ]
@@ -148,7 +148,7 @@ function AdminTopBar({ page }) {
     dashboard: 'Dashboard', products: 'Catalogo prodotti', videos: 'Video landing',
     categories: 'Categorie', brands: 'Marchi', pricing: 'Listini & sconti',
     orders: 'Ordini & RDA', quotes: 'Preventivi', courses: 'Corsi & formazione',
-    promos: 'Promozioni', highlights: 'Macchine in evidenza',
+    promos: 'Promozioni', highlights: 'Immagini landing',
     users: 'Buyer trade', settings: 'Impostazioni',
   };
   return (

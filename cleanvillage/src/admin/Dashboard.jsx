@@ -92,8 +92,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+      <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
         <QuickAction icon="plus" title="Aggiungi un nuovo prodotto" desc="Carica un nuovo SKU nel catalogo, assegnalo alla categoria giusta e pubblicalo nel sito." onClick={() => navigate('/admin/products')} />
+        <QuickAction icon="image" title="Aggiorna immagini landing" desc="Carica o sostituisci le foto dell'hero e delle macchine in evidenza sulla homepage." onClick={() => navigate('/admin/highlights')} />
         <QuickAction icon="video" title="Carica un nuovo video" desc="Aggiungi un video alla landing — tour, demo, intervista — con titolo, durata e posizione." onClick={() => navigate('/admin/videos')} />
         <QuickAction icon="megaphone" title="Crea una promozione" desc="Imposta uno sconto a scaglioni o una promo a tempo, visibile nella strip della homepage." onClick={() => navigate('/admin/promos')} />
       </div>

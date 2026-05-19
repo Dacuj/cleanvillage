@@ -138,7 +138,9 @@ function HeroVisual() {
           <text x="120" y="190" fontFamily="Outfit" fontSize="14" fontWeight="500" fill="#0A4D68" letterSpacing="-0.02em">CleanVillage</text>
         </svg>
 
-        <div style={{ position: 'absolute', left: 20, bottom: 20, right: 20, background: 'rgba(255,255,255,0.96)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'var(--shadow-card)' }}>
+        <ImageSlot id="hero" placeholder="Trascina qui l'immagine principale dell'hero" />
+
+        <div style={{ position: 'absolute', left: 20, bottom: 20, right: 20, background: 'rgba(255,255,255,0.96)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'var(--shadow-card)', zIndex: 3 }}>
           <div>
             <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-mint-700)', fontWeight: 600 }}>Best seller 2026</div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 17, color: 'var(--fg-primary)', letterSpacing: '-0.025em', marginTop: 3 }}>COMAC Innova 100 B</div>
@@ -150,7 +152,7 @@ function HeroVisual() {
           </div>
         </div>
 
-        <div style={{ position: 'absolute', top: 18, right: 18, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+        <div style={{ position: 'absolute', top: 18, right: 18, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end', zIndex: 3 }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', background: 'var(--color-mint-500)', color: 'var(--color-white)', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 11, borderRadius: 999, boxShadow: 'var(--shadow-cta)' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-white)' }} /> Disponibile · 4 pz
           </span>

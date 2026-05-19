@@ -1,6 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { Icon } from './ui.jsx';
 
+export function setImageSlot(id, dataUrl) {
+  try {
+    if (dataUrl) localStorage.setItem(`imgslot:${id}`, dataUrl);
+    else localStorage.removeItem(`imgslot:${id}`);
+  } catch (e) { /* quota */ }
+  try { window.dispatchEvent(new CustomEvent('imgslot:change', { detail: { id } })); } catch { /* */ }
+}
+
+export function getImageSlot(id) {
+  try { return localStorage.getItem(`imgslot:${id}`) || null; } catch { return null; }
+}
+
+const IMGSLOT_EVENT = 'imgslot:change';
+
 export function ImageSlot({ id, placeholder = 'Drop an image here', children, style }) {
   const [image, setImage] = useState(() => {
     try { return localStorage.getItem(`imgslot:${id}`) || null; } catch { return null; }
@@ -8,13 +22,27 @@ export function ImageSlot({ id, placeholder = 'Drop an image here', children, st
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef();
 
+  useEffect(() => {
+    const sync = (e) => {
+      if (e.key && e.key !== `imgslot:${id}`) return;
+      if (e.detail && e.detail.id && e.detail.id !== id) return;
+      try { setImage(localStorage.getItem(`imgslot:${id}`) || null); } catch { /* */ }
+    };
+    window.addEventListener('storage', sync);
+    window.addEventListener(IMGSLOT_EVENT, sync);
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener(IMGSLOT_EVENT, sync);
+    };
+  }, [id]);
+
   const handleFile = (file) => {
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target.result;
       setImage(dataUrl);
-      try { localStorage.setItem(`imgslot:${id}`, dataUrl); } catch { /* quota exceeded */ }
+      setImageSlot(id, dataUrl);
     };
     reader.readAsDataURL(file);
   };
@@ -38,7 +66,7 @@ export function ImageSlot({ id, placeholder = 'Drop an image here', children, st
   const handleClear = (e) => {
     e.stopPropagation();
     setImage(null);
-    try { localStorage.removeItem(`imgslot:${id}`); } catch { /* */ }
+    setImageSlot(id, null);
   };
 
   return (
