@@ -17,6 +17,10 @@ const IMAGE_SLOTS = [
   { id: 'hm-comac-innova', label: 'Macchina in evidenza · slot 1', desc: 'La prima delle tre macchine evidenziate (lavasciuga)' },
   { id: 'hm-karcher-hd', label: 'Macchina in evidenza · slot 2', desc: 'La seconda delle tre (idropulitrice)' },
   { id: 'hm-ghibli-vac', label: 'Macchina in evidenza · slot 3', desc: 'La terza delle tre (aspiraliquidi)' },
+  { id: 'promo-0', label: 'Promo · card 1', desc: 'Sfondo della prima card colorata sotto la sezione categorie' },
+  { id: 'promo-1', label: 'Promo · card 2', desc: 'Sfondo della seconda card promo' },
+  { id: 'promo-2', label: 'Promo · card 3', desc: 'Sfondo della terza card promo' },
+  { id: 'videoPoster', label: 'Poster video aziendale', desc: 'Immagine di copertina mostrata nel riquadro del player video (sezione blu)' },
 ];
 
 export default function LandingEditor() {

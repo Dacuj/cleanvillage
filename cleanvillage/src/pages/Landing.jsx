@@ -5,7 +5,7 @@ import { ProductCard, ProductIllustration } from '../components/product.jsx';
 import { ImageSlot } from '../components/ImageSlot.jsx';
 import { useCategories, useBrands, useProducts, useCourses, useIndustries } from '../lib/storefront.js';
 import { useIsMobile } from '../lib/useBreakpoint.js';
-import { useSiteContent } from '../lib/siteContent.js';
+import { useSiteContent, resolveImageSlot } from '../lib/siteContent.js';
 
 export default function Landing() {
   return (
@@ -391,15 +391,17 @@ function PromoStrip() {
   return (
     <section style={{ padding: isMobile ? '0 20px 0' : '0 32px 0', background: 'var(--bg-page)', marginBottom: isMobile ? 56 : 96 }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : `repeat(${Math.min(3, promos.length)}, 1fr)`, gap: 16 }}>
-        {promos.map((p, i) => <PromoCard key={i} promo={p} onClick={() => navigate('/catalog')} />)}
+        {promos.map((p, i) => <PromoCard key={i} promo={p} index={i} onClick={() => navigate('/catalog')} />)}
       </div>
     </section>
   );
 }
 
-function PromoCard({ promo, onClick }) {
+function PromoCard({ promo, index, onClick }) {
   const [hover, setHover] = useState(false);
   const dark = promo.color === 'teal';
+  const content = useSiteContent();
+  const hasImage = !!resolveImageSlot(content, `promo-${index}`);
   return (
     <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
@@ -415,9 +417,15 @@ function PromoCard({ promo, onClick }) {
         boxShadow: hover ? 'var(--shadow-pop)' : 'var(--shadow-card)',
         transition: 'all var(--motion-base)'
       }}>
-        <div style={{ position: 'absolute', right: -30, bottom: -20, width: '55%', opacity: 0.18, transform: hover ? 'scale(1.08)' : 'scale(1)', transition: 'transform var(--motion-slow)' }}>
-          <ProductIllustration kind={promo.kind} hover={false} />
-        </div>
+        <ImageSlot id={`promo-${index}`} />
+        {hasImage && (
+          <div style={{ position: 'absolute', inset: 0, background: dark ? 'linear-gradient(160deg, rgba(10,77,104,0.55) 0%, rgba(10,77,104,0.9) 100%)' : 'linear-gradient(160deg, rgba(0,102,255,0.55) 0%, rgba(0,102,255,0.9) 100%)', pointerEvents: 'none' }} />
+        )}
+        {!hasImage && (
+          <div style={{ position: 'absolute', right: -30, bottom: -20, width: '55%', opacity: 0.18, transform: hover ? 'scale(1.08)' : 'scale(1)', transition: 'transform var(--motion-slow)' }}>
+            <ProductIllustration kind={promo.kind} hover={false} />
+          </div>
+        )}
         <div style={{ position: 'relative' }}>
           <span style={{ display: 'inline-block', padding: '4px 9px', borderRadius: 'var(--radius-xs)', background: 'rgba(255,255,255,0.15)', fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em' }}>
             {promo.tag}
@@ -606,6 +614,7 @@ function VideoAziendale() {
   const navigate = useNavigate();
   const content = useSiteContent();
   const sec = content.video;
+  const hasPoster = !!resolveImageSlot(content, 'videoPoster');
   return (
     <section style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', padding: isMobile ? '64px 20px' : '112px 32px', position: 'relative' }}>
       <TrustBar height={3} />
@@ -636,6 +645,8 @@ function VideoAziendale() {
           </div>
 
           <div style={{ position: 'relative', aspectRatio: '16/10', background: '#062E40', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-teal-700)' }}>
+            <ImageSlot id="videoPoster" />
+            {!hasPoster && (
             <svg viewBox="0 0 600 380" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
               <defs>
                 <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#C6DEE5" /><stop offset="1" stopColor="#6FA1B0" /></linearGradient>
@@ -672,6 +683,7 @@ function VideoAziendale() {
                 </g>
               )}
             </svg>
+            )}
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(6,46,64,0) 50%, rgba(6,46,64,0.6) 100%)' }} />
             <button onClick={() => setPlaying(p => !p)}
               style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 92, height: 92, borderRadius: '50%', background: 'var(--color-mint-500)', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: '0 12px 40px rgba(6,46,64,0.5), var(--shadow-cta)' }}>

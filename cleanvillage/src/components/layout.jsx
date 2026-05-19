@@ -172,7 +172,15 @@ export function Header() {
   ];
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(255,255,255,0.92)', borderBottom: '1px solid var(--border-subtle)', backdropFilter: 'blur(10px)' }}>
+    <header style={{
+      position: 'sticky', top: 0, zIndex: 100,
+      background: isMobile ? 'var(--bg-surface)' : 'rgba(255,255,255,0.96)',
+      borderBottom: '1px solid var(--border-subtle)',
+      backdropFilter: isMobile ? 'none' : 'blur(10px)',
+      WebkitBackdropFilter: isMobile ? 'none' : 'blur(10px)',
+      isolation: 'isolate',
+      boxShadow: isMobile ? '0 1px 2px rgba(10,77,104,0.06)' : 'none',
+    }}>
       {/* utility strip - desktop only */}
       {!isMobile && (
         <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--color-ice-50)' }}>
