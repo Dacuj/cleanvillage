@@ -3,7 +3,9 @@
 // is intentionally provider-agnostic; swap PROVIDER_URL + the request body
 // shape to migrate off Gemini without touching the client.
 
-const PROVIDER_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const DEFAULT_MODEL = 'gemini-2.5-flash';
+const providerUrl = (model) =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
 function buildSystemPrompt(products) {
   const catalog = (products || []).map(p => ({
@@ -63,8 +65,10 @@ export default async function handler(req, res) {
     },
   };
 
+  const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
+
   try {
-    const r = await fetch(`${PROVIDER_URL}?key=${encodeURIComponent(key)}`, {
+    const r = await fetch(`${providerUrl(model)}?key=${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
