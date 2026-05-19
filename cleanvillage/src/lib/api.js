@@ -319,3 +319,57 @@ export async function deleteLandingImage(storagePath) {
   if (!isSupabaseConfigured || !storagePath) return;
   await supabase.storage.from('landing-images').remove([storagePath]);
 }
+
+// Diagnostic probe used by the landing editor banner. Returns an object
+// describing the next action the operator needs to take:
+//   { ok: true, stage: 'ready', message }
+//   { ok: false, stage: 'env' | 'migration_0002' | 'bucket', message, raw? }
+export async function probeSiteContentSetup() {
+  if (!isSupabaseConfigured) {
+    return {
+      ok: false,
+      stage: 'env',
+      message: 'Variabili VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY mancanti nel file .env.local.',
+    };
+  }
+  try {
+    const { error: tableErr } = await supabase
+      .from('site_content')
+      .select('id', { head: true, count: 'exact' })
+      .eq('id', 1);
+    if (tableErr) {
+      return {
+        ok: false,
+        stage: 'migration_0002',
+        message: 'Tabella `site_content` non trovata. Lancia la migration 0002_site_content.sql nel SQL editor di Supabase.',
+        raw: tableErr.message,
+      };
+    }
+  } catch (e) {
+    return {
+      ok: false,
+      stage: 'migration_0002',
+      message: 'Impossibile leggere la tabella `site_content`. Verifica di aver lanciato la migration 0002_site_content.sql.',
+      raw: e.message,
+    };
+  }
+  try {
+    const { data: bucket, error: bucketErr } = await supabase.storage.getBucket('landing-images');
+    if (bucketErr || !bucket) {
+      return {
+        ok: false,
+        stage: 'bucket',
+        message: 'Bucket `landing-images` non trovato. Lo crea la migration 0002_site_content.sql.',
+        raw: bucketErr?.message,
+      };
+    }
+  } catch (e) {
+    return {
+      ok: false,
+      stage: 'bucket',
+      message: 'Bucket `landing-images` non raggiungibile.',
+      raw: e.message,
+    };
+  }
+  return { ok: true, stage: 'ready', message: 'Supabase collegato. Pubblicazione online attiva.' };
+}

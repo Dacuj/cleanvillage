@@ -7,6 +7,46 @@ Tempo stimato: **10 minuti**.
 
 ---
 
+## Attivazione pubblicazione cloud — 2 step (90 secondi)
+
+> **Se hai già un progetto Supabase, `.env.local` compilato e l'utente
+> admin creato** (sezioni 1–4 più sotto), ti restano solo questi due
+> passi per attivare l'editor della landing in modalità "pubblicato
+> online". Se invece parti da zero, vai prima alle sezioni numerate.
+
+### Step 1 · Lancia la migration `0002_site_content.sql`
+
+1. Apri **[Supabase SQL Editor](https://supabase.com/dashboard/project/_/sql/new)**.
+2. Apri il file `supabase/migrations/0002_site_content.sql` di questo repo
+   e copia tutto il contenuto.
+3. Incollalo nell'editor SQL e clicca **Run** (in basso a destra).
+4. Risultato atteso: `Success. No rows returned.`
+5. Verifica in **Table Editor**: deve esistere la tabella `site_content`
+   con una riga (id = 1, data `{}`).
+
+### Step 2 · Lancia la migration `0003_clear_products.sql`
+
+Stesso processo dello Step 1 con il file
+`supabase/migrations/0003_clear_products.sql`. Svuota i prodotti finti di
+esempio così puoi inserire i tuoi dall'admin.
+
+### Step 3 · Verifica dal sito
+
+1. Apri il sito (deployato o `npm run dev`) e vai su `/admin/landing`.
+2. In alto vedrai un **banner verde**: *"Pubblicazione online attiva"*.
+3. Se invece vedi un banner **rosso** ("Attivazione cloud — 2 step
+   rimanenti") o **giallo** ("Variabili ambiente mancanti"), il banner
+   stesso ti dice esattamente cosa fare: contiene il bottone **Copia SQL**
+   per le migration e il link diretto al SQL editor di Supabase.
+4. Per confermare: cambia un titolo del hero, apri il sito in finestra
+   incognita — il nuovo titolo è visibile a chiunque.
+
+> **Suggerimento operativo.** Quando il banner è verde puoi consegnare la
+> dashboard al cliente: tutto quello che modificherà su `/admin/landing`
+> sarà visibile sul sito pubblico subito dopo il refresh.
+
+---
+
 ## 1. Crea il progetto Supabase
 
 1. Vai su https://supabase.com e accedi (puoi loggarti con GitHub).

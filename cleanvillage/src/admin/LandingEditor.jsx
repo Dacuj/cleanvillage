@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AdminPage, AdminIcon, ABtn, Panel, AField, AInput, ATextarea } from './chrome.jsx';
 import {
   useSiteContent,
@@ -7,8 +7,10 @@ import {
   useRemoteSaveStatus,
   resolveImageSlot,
 } from '../lib/siteContent.js';
-import { uploadLandingImage, deleteLandingImage } from '../lib/api.js';
+import { uploadLandingImage, deleteLandingImage, probeSiteContentSetup } from '../lib/api.js';
 import { isSupabaseConfigured } from '../lib/supabase.js';
+import migration0002Sql from '../../supabase/migrations/0002_site_content.sql?raw';
+import migration0003Sql from '../../supabase/migrations/0003_clear_products.sql?raw';
 
 const IMAGE_SLOTS = [
   { id: 'heroImage', label: 'Hero — immagine principale', desc: 'Visibile a destra del titolo nella prima sezione' },
@@ -55,7 +57,7 @@ export default function LandingEditor() {
         </ABtn>,
       ]}
     >
-      <InfoBanner />
+      <CloudStatusBanner />
 
       {/* ============================================================
           AZIENDA — dati istituzionali
@@ -791,33 +793,188 @@ function SaveIndicator() {
   );
 }
 
-function InfoBanner() {
-  if (!isSupabaseConfigured) {
-    return (
-      <div style={{ padding: '16px 20px', background: 'var(--color-warning-100)', border: '1px solid var(--color-warning-500)', borderRadius: 'var(--radius-md)', marginBottom: 20, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <AdminIcon name="alert-triangle" size={18} color="var(--color-warning-500)" />
-        <div style={{ flex: 1, fontSize: 13, color: 'var(--fg-primary)', lineHeight: 1.6 }}>
-          <b style={{ fontFamily: 'var(--font-display)' }}>Supabase non configurato.</b>{' '}
-          Le modifiche sono salvate solo nel tuo browser e non sono visibili agli altri visitatori. Imposta
-          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--color-ice-100)', padding: '1px 5px', borderRadius: 3, margin: '0 4px' }}>VITE_SUPABASE_URL</code>
-          e
-          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--color-ice-100)', padding: '1px 5px', borderRadius: 3, margin: '0 4px' }}>VITE_SUPABASE_ANON_KEY</code>
-          nel file <code>.env.local</code> e ricompila il sito per abilitare la pubblicazione online.
-        </div>
-      </div>
-    );
-  }
+function CloudStatusBanner() {
+  const [state, setState] = useState({ ok: null, stage: 'loading', message: 'Verifica collegamento Supabase…' });
+  const [copied, setCopied] = useState(null);
+
+  const run = async () => {
+    setState((s) => ({ ...s, stage: 'loading', message: 'Verifica collegamento Supabase…' }));
+    const r = await probeSiteContentSetup();
+    setState(r);
+  };
+
+  useEffect(() => { run(); }, []);
+
+  const copySql = async (which, sql) => {
+    try {
+      await navigator.clipboard.writeText(sql);
+      setCopied(which);
+      setTimeout(() => setCopied(null), 2200);
+    } catch {
+      alert("Impossibile copiare. Apri il file dal repo manualmente.");
+    }
+  };
+
+  const sqlEditorUrl = 'https://supabase.com/dashboard/project/_/sql/new';
+
+  // Palette by status
+  const PALETTE = {
+    loading: { bg: 'var(--color-ice-50)', border: 'var(--border-default)', fg: 'var(--fg-muted)', icon: 'loader', iconColor: 'var(--fg-muted)' },
+    ready:   { bg: 'var(--color-mint-50)', border: 'var(--color-mint-300)', fg: 'var(--color-mint-800)', icon: 'check-circle', iconColor: 'var(--color-mint-700)' },
+    env:     { bg: 'var(--color-warning-100)', border: 'var(--color-warning-500)', fg: 'var(--fg-primary)', icon: 'alert-triangle', iconColor: 'var(--color-warning-500)' },
+    migration_0002: { bg: 'var(--color-danger-100)', border: 'var(--color-danger-500)', fg: 'var(--fg-primary)', icon: 'alert-circle', iconColor: 'var(--color-danger-500)' },
+    bucket:  { bg: 'var(--color-danger-100)', border: 'var(--color-danger-500)', fg: 'var(--fg-primary)', icon: 'alert-circle', iconColor: 'var(--color-danger-500)' },
+  };
+  const p = PALETTE[state.stage] || PALETTE.loading;
+
   return (
-    <div style={{ padding: '16px 20px', background: 'var(--color-teal-50)', border: '1px solid var(--color-teal-100)', borderRadius: 'var(--radius-md)', marginBottom: 20, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-      <AdminIcon name="cloud-upload" size={18} color="var(--color-teal-500)" />
-      <div style={{ flex: 1, fontSize: 13, color: 'var(--color-teal-700)', lineHeight: 1.6 }}>
-        <b style={{ color: 'var(--color-teal-500)', fontFamily: 'var(--font-display)' }}>Pubblicazione automatica.</b>{' '}
-        Ogni modifica viene inviata a Supabase e diventa visibile a tutti i visitatori del sito appena ricaricano la pagina.
-        Lo stato della pubblicazione è indicato nell'angolo in alto a destra.
+    <div style={{ padding: '16px 20px', background: p.bg, border: `1px solid ${p.border}`, borderRadius: 'var(--radius-md)', marginBottom: 20, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+      <AdminIcon name={p.icon} size={20} color={p.iconColor} />
+      <div style={{ flex: 1, fontSize: 13, color: p.fg, lineHeight: 1.6 }}>
+        <BannerHeader stage={state.stage} />
+        <BannerBody
+          stage={state.stage}
+          message={state.message}
+          raw={state.raw}
+          copied={copied}
+          onCopy={copySql}
+          sqlEditorUrl={sqlEditorUrl}
+        />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end', flexShrink: 0 }}>
+        <ABtn size="sm" variant={state.ok ? 'ghost' : 'secondary'} icon={<AdminIcon name="refresh-cw" size={12} />} onClick={run}>Riprova</ABtn>
+        {(state.stage === 'migration_0002' || state.stage === 'bucket') && (
+          <a href={sqlEditorUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: 'var(--color-teal-500)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            SQL editor <AdminIcon name="external-link" size={10} />
+          </a>
+        )}
       </div>
     </div>
   );
 }
+
+function BannerHeader({ stage }) {
+  const titles = {
+    loading: 'Sto verificando il collegamento…',
+    ready: 'Pubblicazione online attiva',
+    env: 'Variabili ambiente mancanti',
+    migration_0002: 'Attivazione cloud — 2 step rimanenti',
+    bucket: 'Bucket immagini mancante',
+  };
+  return (
+    <b style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 500, color: 'inherit', display: 'block', marginBottom: 4 }}>
+      {titles[stage] || 'Stato Supabase'}
+    </b>
+  );
+}
+
+function BannerBody({ stage, message, raw, copied, onCopy, sqlEditorUrl }) {
+  if (stage === 'ready') {
+    return (
+      <span>
+        Le modifiche che fai qui finiscono su Supabase e diventano visibili a tutti i visitatori del sito appena ricaricano la pagina.
+      </span>
+    );
+  }
+  if (stage === 'loading') {
+    return <span style={{ opacity: 0.7 }}>{message}</span>;
+  }
+  if (stage === 'env') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <span>Il sito non ha le credenziali Supabase, quindi le modifiche restano sul tuo browser e non sono pubblicate online.</span>
+        <span>
+          Apri il file <code style={Kbd}>.env.local</code> nella radice del progetto e compila:
+        </span>
+        <pre style={CodeBlock}>
+{`VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...la-tua-anon-key...`}
+        </pre>
+        <span>Trovi i valori in <b>Supabase Dashboard → Project Settings → API</b>. Dopo salvato, riavvia il dev server o rilancia il deploy.</span>
+      </div>
+    );
+  }
+  // migration_0002 or bucket — both fixable by the same migration.
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span>
+        Il database Supabase è collegato ma manca la tabella <code style={Kbd}>site_content</code> (e il bucket <code style={Kbd}>landing-images</code>). Bastano 2 step da 1 minuto totale per attivare la pubblicazione online.
+      </span>
+      <div style={{ marginTop: 6, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Step
+          n={1}
+          title="Lancia la migration 0002_site_content.sql"
+          body="Crea la tabella che ospita i contenuti della landing + il bucket immagini."
+          actions={[
+            { label: copied === '0002' ? 'SQL copiato ✓' : 'Copia SQL', icon: 'copy', onClick: () => onCopy('0002', migration0002Sql) },
+            { label: 'Apri SQL editor', icon: 'external-link', href: sqlEditorUrl },
+          ]}
+        />
+        <Step
+          n={2}
+          title="Lancia la migration 0003_clear_products.sql"
+          body="Svuota i prodotti finti rimasti dal seed, così inserisci i tuoi dall'admin."
+          actions={[
+            { label: copied === '0003' ? 'SQL copiato ✓' : 'Copia SQL', icon: 'copy', onClick: () => onCopy('0003', migration0003Sql) },
+            { label: 'Apri SQL editor', icon: 'external-link', href: sqlEditorUrl },
+          ]}
+        />
+        <Step
+          n={3}
+          title="Torna qui e clicca «Riprova»"
+          body='Il banner diventa verde quando tutto è collegato.'
+        />
+      </div>
+      {raw && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>Errore Supabase: {raw}</span>}
+    </div>
+  );
+}
+
+function Step({ n, title, body, actions = [] }) {
+  return (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+      <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--color-teal-500)', color: 'var(--color-white)', display: 'grid', placeItems: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{n}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 500, color: 'var(--fg-primary)' }}>{title}</div>
+        <div style={{ fontSize: 12, color: 'var(--fg-secondary)', marginTop: 2 }}>{body}</div>
+        {actions.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+            {actions.map((a, i) => a.href ? (
+              <a key={i} href={a.href} target="_blank" rel="noopener noreferrer" style={LinkBtn}>
+                <AdminIcon name={a.icon} size={11} /> {a.label}
+              </a>
+            ) : (
+              <button key={i} onClick={a.onClick} style={LinkBtn}>
+                <AdminIcon name={a.icon} size={11} /> {a.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const Kbd = {
+  fontFamily: 'var(--font-mono)', fontSize: 12,
+  background: 'var(--color-ice-100)', padding: '1px 6px',
+  borderRadius: 3, color: 'var(--fg-primary)',
+};
+
+const CodeBlock = {
+  fontFamily: 'var(--font-mono)', fontSize: 12,
+  background: 'var(--bg-surface)', border: '1px solid var(--border-default)',
+  borderRadius: 'var(--radius-sm)', padding: '10px 12px',
+  whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, color: 'var(--fg-primary)',
+};
+
+const LinkBtn = {
+  display: 'inline-flex', alignItems: 'center', gap: 5,
+  padding: '5px 10px', fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
+  color: 'var(--color-teal-500)', background: 'var(--bg-surface)',
+  border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)',
+  cursor: 'pointer', textDecoration: 'none',
+};
 
 function CertificationEditor({ items, onChange }) {
   const [val, setVal] = useState('');
