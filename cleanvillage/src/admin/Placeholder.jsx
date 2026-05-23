@@ -1,17 +1,9 @@
 import { AdminPage, AdminIcon } from './chrome.jsx';
 
-const PAGE_LABELS = {
-  orders: 'Ordini & RDA',
-  quotes: 'Preventivi',
-  categories: 'Categorie',
-  brands: 'Marchi',
-  pricing: 'Listini & sconti',
-  highlights: 'Macchine in evidenza',
-  promos: 'Promozioni',
-  courses: 'Corsi & formazione',
-  users: 'Buyer trade',
-  settings: 'Impostazioni',
-};
+// Fallback for unknown admin routes. The first-class pages now live
+// in their own files (Settings, Orders, Highlights, Promos, Courses,
+// Users, Pricing, etc.) and are wired up in admin/App.jsx.
+const PAGE_LABELS = {};
 
 export default function Placeholder({ page }) {
   const label = PAGE_LABELS[page] || page;

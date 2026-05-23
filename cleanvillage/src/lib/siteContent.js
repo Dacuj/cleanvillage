@@ -253,6 +253,94 @@ export const DEFAULT_CONTENT = {
     videoPoster: null,
     hqMap: null,
   },
+  // Email outbound config & templates. Used by the admin to configure
+  // where notifications are sent and the body of each transactional mail.
+  // Actual sending requires a backend SMTP/Resend integration — the
+  // settings here are stored so a future serverless function can read
+  // them. See SETTINGS.md for wiring instructions.
+  emailSettings: {
+    senderName: 'Clean Village Srl',
+    senderEmail: 'cleanvillagesrl@gmail.com',
+    replyTo: 'direzione.cleanvillage@gmail.com',
+    notificationEmail: 'cleanvillagesrl@gmail.com',
+    // Outbound provider: 'smtp', 'resend', 'sendgrid'.
+    provider: 'smtp',
+    smtpHost: 'smtp.gmail.com',
+    smtpPort: '587',
+    smtpUser: '',
+    smtpSecret: '',
+    // Off until an integration is configured. The toggle is informational
+    // — the actual sending must be wired in `cleanvillage/api/`.
+    enabled: false,
+    bccDirectionEmail: true,
+    signatureLine: 'Clean Village Srl · Villaricca (NA) · cleanvillage.it',
+  },
+  emailTemplates: {
+    quoteReceivedInternal: {
+      enabled: true,
+      to: '{notificationEmail}',
+      subject: 'Nuova richiesta · {company}',
+      body:
+        'Hai ricevuto una nuova richiesta dal sito.\n\n' +
+        'Azienda: {company}\n' +
+        'P.IVA: {vat}\n' +
+        'Contatto: {contact_name} · {email}\n' +
+        'Telefono: {phone}\n' +
+        'Tempistica: {timeline}\n' +
+        'Esigenze: {needs}\n\n' +
+        'Messaggio:\n{message}\n\n' +
+        '— Apri il pannello: {adminUrl}',
+    },
+    quoteReceivedCustomer: {
+      enabled: true,
+      to: '{email}',
+      subject: 'Abbiamo ricevuto la tua richiesta · Clean Village',
+      body:
+        'Ciao {contact_name},\n\n' +
+        'grazie per averci contattato. La tua richiesta è stata ricevuta — non è un ordine di pagamento, ' +
+        'ma una segnalazione di interesse. Un nostro responsabile commerciale ti contatterà entro 1 giorno ' +
+        'lavorativo con disponibilità di stock, prezzo a scaglioni e tempi di consegna confermati.\n\n' +
+        'Riferimento: {reference}\n\n' +
+        'A presto,\n{signatureLine}',
+    },
+    orderIntentInternal: {
+      enabled: true,
+      to: '{notificationEmail}',
+      subject: 'Nuova richiesta di acquisto · {productName}',
+      body:
+        'Un cliente ha richiesto di essere contattato per un prodotto.\n\n' +
+        'Prodotto: {productName} ({sku})\n' +
+        'Quantità: {quantity}\n' +
+        'Azienda: {company}\n' +
+        'Contatto: {contact_name} · {email} · {phone}\n\n' +
+        'Nota: si tratta di una notifica di interesse — il cliente NON ha pagato. ' +
+        'Contattalo per concordare condizioni e fatturazione.',
+    },
+    orderIntentCustomer: {
+      enabled: true,
+      to: '{email}',
+      subject: 'Richiesta ricevuta · ti contattiamo a breve',
+      body:
+        'Ciao {contact_name},\n\n' +
+        'abbiamo registrato la tua richiesta per {productName}. Ricordati che non si tratta di un ordine ' +
+        'di pagamento: ti ricontattiamo entro 1 giorno lavorativo per concordare quantità, prezzo definitivo ' +
+        'e tempi di consegna.\n\n' +
+        'Riferimento: {reference}\n\n' +
+        'A presto,\n{signatureLine}',
+    },
+  },
+  pricing: {
+    showOnStorefront: true,
+    note: 'I prezzi mostrati sul sito sono indicativi e validi solo per riferimento. Il prezzo definitivo è confermato in fase di preventivo.',
+    tiers: [
+      { qty: '1–2', discount: 0, label: 'Listino' },
+      { qty: '3–9', discount: 7, label: '−7%' },
+      { qty: '10–24', discount: 14, label: '−14%' },
+      { qty: '25+', discount: null, label: 'Custom' },
+    ],
+    minOrder: '€ 250',
+    paymentTerms: '30 gg fine mese',
+  },
   // Pagine istituzionali — testi modificabili dall'editor.
   legalPages: {
     salesTerms: {

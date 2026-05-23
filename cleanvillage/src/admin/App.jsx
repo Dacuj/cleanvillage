@@ -7,6 +7,13 @@ import AdminCategories from './Categories.jsx';
 import AdminBrands from './Brands.jsx';
 import AdminQuotes from './Quotes.jsx';
 import AdminLanding from './LandingEditor.jsx';
+import AdminSettings from './Settings.jsx';
+import AdminOrders from './Orders.jsx';
+import AdminHighlights from './Highlights.jsx';
+import AdminPromos from './Promos.jsx';
+import AdminCourses from './Courses.jsx';
+import AdminUsers from './Users.jsx';
+import AdminPricing from './Pricing.jsx';
 import Placeholder from './Placeholder.jsx';
 import AdminLogin from './Login.jsx';
 import { useAuth } from '../lib/auth.jsx';
@@ -46,6 +53,13 @@ export default function AdminApp() {
         <Route path="/categories" element={<AdminCategories />} />
         <Route path="/brands" element={<AdminBrands />} />
         <Route path="/quotes" element={<AdminQuotes />} />
+        <Route path="/orders" element={<AdminOrders />} />
+        <Route path="/highlights" element={<AdminHighlights />} />
+        <Route path="/promos" element={<AdminPromos />} />
+        <Route path="/courses" element={<AdminCourses />} />
+        <Route path="/users" element={<AdminUsers />} />
+        <Route path="/pricing" element={<AdminPricing />} />
+        <Route path="/settings" element={<AdminSettings />} />
         <Route path="/:section" element={<PlaceholderRoute />} />
       </Routes>
     </AdminShell>

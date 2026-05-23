@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { AdminPage, AdminIcon, ABtn, Badge, Panel, Modal, AField, AInput, ATextarea, ASelect, DataTable } from './chrome.jsx';
+import { AdminPage, AdminIcon, ABtn, Badge, Panel, Modal, AField, AInput, ATextarea, ASelect, DataTable, useAdminStats } from './chrome.jsx';
 import { listVideos, upsertVideo, deleteVideo, listProducts } from '../lib/api.js';
 import { isSupabaseConfigured } from '../lib/supabase.js';
 
 export default function AdminVideos() {
+  const { refresh } = useAdminStats();
   const [items, setItems] = useState([]);
   const [products, setProducts] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -18,11 +19,11 @@ export default function AdminVideos() {
   const handleSave = async (data, isNew) => {
     if (!isSupabaseConfigured) { alert('Configura Supabase.'); return; }
     if (isNew && !data.id) data.id = `vid-${Date.now().toString(36)}`;
-    await upsertVideo(data); setEditing(null); reload();
+    await upsertVideo(data); setEditing(null); reload(); refresh();
   };
   const handleDelete = async (id) => {
     if (!confirm('Eliminare il video?')) return;
-    await deleteVideo(id); setEditing(null); reload();
+    await deleteVideo(id); setEditing(null); reload(); refresh();
   };
 
   useEffect(() => {

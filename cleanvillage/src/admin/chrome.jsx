@@ -1,9 +1,60 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, createContext, useContext, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { useAuth } from '../lib/auth.jsx';
 import { isSupabaseConfigured } from '../lib/supabase.js';
 import { useIsMobile } from '../lib/useBreakpoint.js';
+import {
+  listProducts, listCategories, listBrands,
+  listQuotes, listCourses, listVideos,
+} from '../lib/api.js';
+
+/* ============================================================
+   ADMIN STATS CONTEXT — counts shown in the sidebar and dashboard
+   ============================================================ */
+const AdminStatsCtx = createContext(null);
+
+export function useAdminStats() {
+  return useContext(AdminStatsCtx) || { counts: {}, refresh: () => {} };
+}
+
+function AdminStatsProvider({ children }) {
+  const [counts, setCounts] = useState({});
+
+  const refresh = useCallback(async () => {
+    try {
+      const [products, categories, brands, quotes, courses, videos] = await Promise.all([
+        listProducts().catch(() => []),
+        listCategories().catch(() => []),
+        listBrands().catch(() => []),
+        listQuotes().catch(() => []),
+        listCourses().catch(() => []),
+        listVideos().catch(() => []),
+      ]);
+      setCounts({
+        products: products.length,
+        categories: categories.length,
+        brands: brands.length,
+        quotes: quotes.length,
+        newQuotes: quotes.filter(q => q.status === 'new').length,
+        openQuotes: quotes.filter(q => q.status === 'new' || q.status === 'contacted' || q.status === 'quoted').length,
+        courses: courses.length,
+        videos: videos.length,
+        liveVideos: videos.filter(v => v.status === 'live').length,
+        highlighted: products.filter(p => p.is_highlighted).length,
+        featured: products.filter(p => p.is_featured).length,
+      });
+    } catch (e) { /* ignore */ }
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  return (
+    <AdminStatsCtx.Provider value={{ counts, refresh }}>
+      {children}
+    </AdminStatsCtx.Provider>
+  );
+}
 
 /* ============================================================
    ICON helper
@@ -33,57 +84,61 @@ export function AdminShell({ page, children }) {
   useEffect(() => { setDrawerOpen(false); }, [page]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '248px 1fr', minHeight: '100vh', background: 'var(--bg-page)' }}>
-      {!isMobile && <AdminSidebar page={page} />}
-      {isMobile && drawerOpen && (
-        <>
-          <div onClick={() => setDrawerOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
-          <div style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '86vw', maxWidth: 300, zIndex: 50, overflowY: 'auto' }}>
-            <AdminSidebar page={page} onNavigate={() => setDrawerOpen(false)} />
-          </div>
-        </>
-      )}
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
-        <AdminTopBar page={page} isMobile={isMobile} onOpenDrawer={() => setDrawerOpen(true)} />
-        <main style={{ flex: 1, overflow: 'auto' }}>
-          {children}
-        </main>
+    <AdminStatsProvider>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '248px 1fr', minHeight: '100vh', background: 'var(--bg-page)' }}>
+        {!isMobile && <AdminSidebar page={page} />}
+        {isMobile && drawerOpen && (
+          <>
+            <div onClick={() => setDrawerOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
+            <div style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '86vw', maxWidth: 300, zIndex: 50, overflowY: 'auto' }}>
+              <AdminSidebar page={page} onNavigate={() => setDrawerOpen(false)} />
+            </div>
+          </>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
+          <AdminTopBar page={page} isMobile={isMobile} onOpenDrawer={() => setDrawerOpen(true)} />
+          <main style={{ flex: 1, overflow: 'auto' }}>
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AdminStatsProvider>
   );
 }
 
 function AdminSidebar({ page, onNavigate }) {
   const navigate = useNavigate();
+  const { counts } = useAdminStats();
   const go = (path) => { navigate(path); onNavigate?.(); };
+  const showCount = (n) => (typeof n === 'number' ? n : null);
   const groups = [
     {
       label: 'Generale', items: [
         { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard', path: '/admin' },
-        { id: 'landing', icon: 'layout-template', label: 'Editor sito', path: '/admin/landing', badge: 'NEW' },
-        { id: 'quotes', icon: 'file-text', label: 'Preventivi', badge: 4, path: '/admin/quotes' },
+        { id: 'landing', icon: 'layout-template', label: 'Editor sito', path: '/admin/landing' },
+        { id: 'quotes', icon: 'file-text', label: 'Preventivi', badge: showCount(counts.newQuotes), path: '/admin/quotes' },
       ]
     },
     {
       label: 'Catalogo', items: [
-        { id: 'products', icon: 'package', label: 'Prodotti', count: 571, path: '/admin/products' },
-        { id: 'categories', icon: 'folder-tree', label: 'Categorie', count: 11, path: '/admin/categories' },
-        { id: 'brands', icon: 'tag', label: 'Marchi', count: 24, path: '/admin/brands' },
+        { id: 'products', icon: 'package', label: 'Prodotti', count: showCount(counts.products), path: '/admin/products' },
+        { id: 'categories', icon: 'folder-tree', label: 'Categorie', count: showCount(counts.categories), path: '/admin/categories' },
+        { id: 'brands', icon: 'tag', label: 'Marchi', count: showCount(counts.brands), path: '/admin/brands' },
         { id: 'pricing', icon: 'percent', label: 'Listini & sconti', path: '/admin/pricing' },
       ]
     },
     {
       label: 'Contenuti landing', items: [
-        { id: 'videos', icon: 'video', label: 'Video', path: '/admin/videos' },
-        { id: 'highlights', icon: 'star', label: 'Macchine in evidenza', path: '/admin/highlights' },
+        { id: 'videos', icon: 'video', label: 'Video', count: showCount(counts.videos), path: '/admin/videos' },
+        { id: 'highlights', icon: 'star', label: 'Macchine in evidenza', count: showCount(counts.highlighted), path: '/admin/highlights' },
         { id: 'promos', icon: 'megaphone', label: 'Promozioni', path: '/admin/promos' },
-        { id: 'courses', icon: 'graduation-cap', label: 'Corsi & formazione', path: '/admin/courses' },
+        { id: 'courses', icon: 'graduation-cap', label: 'Corsi & formazione', count: showCount(counts.courses), path: '/admin/courses' },
       ]
     },
     {
       label: 'Amministrazione', items: [
-        { id: 'orders', icon: 'shopping-bag', label: 'Ordini & RDA', badge: 12, path: '/admin/orders' },
-        { id: 'users', icon: 'users', label: 'Buyer', path: '/admin/users' },
+        { id: 'orders', icon: 'shopping-bag', label: 'Richieste contatto', badge: showCount(counts.openQuotes), path: '/admin/orders' },
+        { id: 'users', icon: 'users', label: 'Contatti & buyer', path: '/admin/users' },
         { id: 'settings', icon: 'settings', label: 'Impostazioni', path: '/admin/settings' },
       ]
     },
@@ -164,9 +219,9 @@ function AdminTopBar({ page, isMobile, onOpenDrawer }) {
     dashboard: 'Dashboard', landing: 'Editor sito',
     products: 'Catalogo prodotti', videos: 'Video landing',
     categories: 'Categorie', brands: 'Marchi', pricing: 'Listini & sconti',
-    orders: 'Ordini & RDA', quotes: 'Preventivi', courses: 'Corsi & formazione',
+    orders: 'Richieste contatto', quotes: 'Preventivi', courses: 'Corsi & formazione',
     promos: 'Promozioni', highlights: 'Macchine in evidenza',
-    users: 'Buyer', settings: 'Impostazioni',
+    users: 'Contatti & buyer', settings: 'Impostazioni',
   };
   return (
     <header style={{ height: 62, background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', padding: isMobile ? '0 14px' : '0 28px', display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 20, flexShrink: 0, position: 'sticky', top: 0, zIndex: 5 }}>

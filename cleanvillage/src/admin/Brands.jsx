@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { AdminPage, AdminIcon, ABtn, Panel, Modal, AField, AInput, ASelect, DataTable } from './chrome.jsx';
+import { AdminPage, AdminIcon, ABtn, Panel, Modal, AField, AInput, ASelect, DataTable, useAdminStats } from './chrome.jsx';
 import { listBrands, upsertBrand, deleteBrand } from '../lib/api.js';
 import { isSupabaseConfigured } from '../lib/supabase.js';
 
 export default function AdminBrands() {
+  const { refresh } = useAdminStats();
   const [items, setItems] = useState([]);
   const [editing, setEditing] = useState(null);
 
@@ -12,11 +13,11 @@ export default function AdminBrands() {
 
   const handleSave = async (data, isNew) => {
     if (!isSupabaseConfigured) { alert('Configura Supabase.'); return; }
-    await upsertBrand(data); setEditing(null); reload();
+    await upsertBrand(data); setEditing(null); reload(); refresh();
   };
   const handleDelete = async (id) => {
     if (!confirm('Eliminare il marchio?')) return;
-    await deleteBrand(id); setEditing(null); reload();
+    await deleteBrand(id); setEditing(null); reload(); refresh();
   };
 
   return (

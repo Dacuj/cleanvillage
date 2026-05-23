@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminPage, AdminIcon, ABtn, Badge, Panel, Modal, AField, AInput, ATextarea, ASelect, DataTable } from './chrome.jsx';
+import { AdminPage, AdminIcon, ABtn, Badge, Panel, Modal, AField, AInput, ATextarea, ASelect, DataTable, useAdminStats } from './chrome.jsx';
 import { listCategories, upsertCategory, deleteCategory } from '../lib/api.js';
 import { isSupabaseConfigured } from '../lib/supabase.js';
 
@@ -7,6 +7,7 @@ const ICONS = ['truck', 'spray-can', 'flask-conical', 'shopping-cart', 'wind', '
 const KINDS = ['scrubber', 'washer', 'detergent', 'cart', 'vacuum', 'shoe', 'pad', 'dryer', 'spray', 'glass', 'paper'];
 
 export default function AdminCategories() {
+  const { refresh } = useAdminStats();
   const [items, setItems] = useState([]);
   const [editing, setEditing] = useState(null);
 
@@ -16,12 +17,12 @@ export default function AdminCategories() {
   const handleSave = async (data, isNew) => {
     if (!isSupabaseConfigured) { alert('Configura Supabase per salvare.'); return; }
     if (isNew && !data.id) data.id = data.short.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    await upsertCategory(data); setEditing(null); reload();
+    await upsertCategory(data); setEditing(null); reload(); refresh();
   };
 
   const handleDelete = async (id) => {
     if (!confirm('Eliminare la categoria? I prodotti associati rimarranno senza categoria.')) return;
-    await deleteCategory(id); setEditing(null); reload();
+    await deleteCategory(id); setEditing(null); reload(); refresh();
   };
 
   return (

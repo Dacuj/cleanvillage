@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { AdminPage, AdminIcon, ABtn, Badge, Panel, Modal, AField, AInput, ATextarea, ASelect, DataTable, adminInputStyle } from './chrome.jsx';
+import { AdminPage, AdminIcon, ABtn, Badge, Panel, Modal, AField, AInput, ATextarea, ASelect, DataTable, adminInputStyle, useAdminStats } from './chrome.jsx';
 import { ProductIllustration } from '../components/product.jsx';
 import {
   listProducts, listCategories, upsertProduct, deleteProduct,
@@ -8,6 +8,7 @@ import {
 import { isSupabaseConfigured } from '../lib/supabase.js';
 
 export default function AdminProducts() {
+  const { refresh: refreshCounts } = useAdminStats();
   const [items, setItems] = useState([]);
   const [cats, setCats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +53,7 @@ export default function AdminProducts() {
       if (isNew && !data.id) data.id = `${data.sku.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36).slice(-4)}`;
       await upsertProduct(data);
       await reload();
+      refreshCounts();
       // Re-select the saved product so the modal stays open with image upload available
       const refreshed = await listProducts();
       const saved = refreshed.find(p => p.id === data.id);
@@ -67,6 +69,7 @@ export default function AdminProducts() {
       await deleteProduct(id);
       setEditing(null);
       await reload();
+      refreshCounts();
     } catch (e) {
       alert('Errore eliminazione: ' + e.message);
     }

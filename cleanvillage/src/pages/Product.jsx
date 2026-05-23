@@ -180,6 +180,10 @@ export default function Product() {
                   Richiedi preventivo per {qty} {qty === 1 ? 'unità' : 'unità'}
                 </Button>
               </div>
+              <div style={{ marginTop: 12, fontSize: 11, color: 'var(--fg-muted)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Icon name="info" size={12} />
+                <span>Cliccando invii una richiesta di contatto. Nessun pagamento richiesto — ti chiamiamo noi entro 1 giorno lavorativo.</span>
+              </div>
             </div>
 
             {/* Service strip */}

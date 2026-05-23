@@ -163,13 +163,19 @@ export default function Contact() {
               {err}
             </div>
           )}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', marginTop: 8, paddingTop: 24, borderTop: '1px solid var(--border-subtle)', gap: 16, flexDirection: isMobile ? 'column' : 'row' }}>
-            <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', maxWidth: '38ch', lineHeight: 1.5 }}>
-              {cp.submitNote}
-            </span>
-            <Button variant="cta" size="lg" type="submit" full={isMobile} disabled={busy} iconRight={<Icon name="arrow-right" size={14} />}>
-              {busy ? 'Invio in corso…' : 'Invia la richiesta'}
-            </Button>
+          <div style={{ marginTop: 8, paddingTop: 24, borderTop: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: 'var(--color-mint-50)', borderRadius: 999, fontSize: 11, fontWeight: 600, color: 'var(--color-mint-700)', marginBottom: 14 }}>
+              <Icon name="info" size={12} />
+              Questa è una richiesta di contatto — nessun pagamento in questa fase
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', gap: 16, flexDirection: isMobile ? 'column' : 'row' }}>
+              <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', maxWidth: '38ch', lineHeight: 1.5 }}>
+                {cp.submitNote}
+              </span>
+              <Button variant="cta" size="lg" type="submit" full={isMobile} disabled={busy} iconRight={<Icon name="arrow-right" size={14} />}>
+                {busy ? 'Invio in corso…' : 'Invia la richiesta'}
+              </Button>
+            </div>
           </div>
         </form>
 
@@ -338,21 +344,27 @@ function HQCard({ co }) {
 }
 
 function ContactSuccess({ onReset, onNav }) {
+  const ref = `CV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`;
   return (
     <main style={{ minHeight: '70vh', display: 'grid', placeItems: 'center', padding: '72px 32px', background: 'var(--bg-page)' }}>
-      <div style={{ maxWidth: 540, textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '48px 48px 44px', boxShadow: 'var(--shadow-card)' }}>
+      <div style={{ maxWidth: 580, textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '48px 48px 44px', boxShadow: 'var(--shadow-card)' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--color-mint-50)', color: 'var(--color-mint-700)', display: 'grid', placeItems: 'center', margin: '0 auto 24px' }}>
           <Icon name="check" size={32} strokeWidth={2} />
         </div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 36, letterSpacing: '-0.035em', margin: '0 0 14px' }}>
           Richiesta ricevuta.
         </h2>
-        <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: '0 0 24px' }}>
-          Un trade rep risponderà entro 1 giorno lavorativo con disponibilità di stock, prezzo a scaglioni e finestra di consegna confermata.
+        <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: '0 0 18px' }}>
+          La tua richiesta è stata presa in carico — <b>non è un ordine di pagamento.</b> Un nostro responsabile commerciale ti
+          contatterà entro 1 giorno lavorativo per concordare disponibilità di stock, prezzo a scaglioni e finestra di consegna.
         </p>
-        <div style={{ display: 'inline-block', padding: '10px 16px', background: 'var(--color-ice-50)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', marginBottom: 32 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: 'var(--color-mint-50)', border: '1px solid var(--color-mint-300, #BDE9CC)', borderRadius: 999, marginBottom: 22, fontSize: 12, color: 'var(--color-mint-700)', fontWeight: 600 }}>
+          <Icon name="info" size={13} />
+          Nessun pagamento richiesto in questa fase
+        </div>
+        <div style={{ display: 'block', padding: '10px 16px', background: 'var(--color-ice-50)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', marginBottom: 32 }}>
           <span style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600, marginRight: 10 }}>Riferimento</span>
-          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-teal-500)', fontWeight: 600 }}>CV-2026-04472</code>
+          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-teal-500)', fontWeight: 600 }}>{ref}</code>
         </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
           <Button variant="primary" onClick={onNav}>Continua a sfogliare</Button>
