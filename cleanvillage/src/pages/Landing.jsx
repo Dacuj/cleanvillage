@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon, Button, TrustBar, Eyebrow, Spec } from '../components/ui.jsx';
 import { ProductCard, ProductIllustration } from '../components/product.jsx';
 import { ImageSlot } from '../components/ImageSlot.jsx';
-import { useCategories, useBrands, useProducts, useCourses, useIndustries } from '../lib/storefront.js';
+import { useCategories, useBrands, useProducts, useCourses, useIndustries, useVideos } from '../lib/storefront.js';
 import { useIsMobile } from '../lib/useBreakpoint.js';
 import { useSiteContent, resolveImageSlot } from '../lib/siteContent.js';
 
@@ -613,8 +613,12 @@ function VideoAziendale() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const content = useSiteContent();
+  const videos = useVideos();
   const sec = content.video;
-  const hasPoster = !!resolveImageSlot(content, 'videoPoster');
+  const heroVideo = videos.find(v => v.spot === 'Hero · Video Aziendale' && v.file_url) || null;
+  const hasPoster = !!resolveImageSlot(content, 'videoPoster') || !!heroVideo?.thumbnail_url;
+  const displayDuration = heroVideo?.duration || '03:24';
+  const displayLabel = heroVideo?.title?.toUpperCase().replace(/\s+/g, '_').slice(0, 32) + '.MP4' || sec.placeholderLabel;
   return (
     <section style={{ background: 'var(--color-teal-500)', color: 'var(--color-white)', padding: isMobile ? '64px 20px' : '112px 32px', position: 'relative' }}>
       <TrustBar height={3} />
@@ -645,8 +649,22 @@ function VideoAziendale() {
           </div>
 
           <div style={{ position: 'relative', aspectRatio: '16/10', background: '#062E40', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-teal-700)' }}>
-            <ImageSlot id="videoPoster" />
-            {!hasPoster && (
+            {playing && heroVideo ? (
+              <video
+                src={heroVideo.file_url}
+                poster={heroVideo.thumbnail_url || undefined}
+                controls
+                autoPlay
+                playsInline
+                onEnded={() => setPlaying(false)}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
+              />
+            ) : heroVideo?.thumbnail_url ? (
+              <img src={heroVideo.thumbnail_url} alt={heroVideo.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <ImageSlot id="videoPoster" />
+            )}
+            {!hasPoster && !playing && (
             <svg viewBox="0 0 600 380" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
               <defs>
                 <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#C6DEE5" /><stop offset="1" stopColor="#6FA1B0" /></linearGradient>
@@ -684,25 +702,27 @@ function VideoAziendale() {
               )}
             </svg>
             )}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(6,46,64,0) 50%, rgba(6,46,64,0.6) 100%)' }} />
-            <button onClick={() => setPlaying(p => !p)}
-              style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 92, height: 92, borderRadius: '50%', background: 'var(--color-mint-500)', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: '0 12px 40px rgba(6,46,64,0.5), var(--shadow-cta)' }}>
-              {playing ?
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="var(--color-white)"><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg> :
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--color-white)" style={{ marginLeft: 3 }}><path d="M8 5v14l11-7z" /></svg>
-              }
-            </button>
-            <div style={{ position: 'absolute', left: 18, right: 18, bottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-white)', flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.04em' }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-danger-500)', boxShadow: '0 0 0 3px rgba(180,35,24,0.3)' }} />
-                {playing ? 'PLAYING' : '03:24'}
-                <span>· {sec.locationLabel}</span>
-              </div>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-100)' }}>4K · HDR</span>
-            </div>
-            <div style={{ position: 'absolute', top: 18, left: 18, padding: '6px 10px', background: 'rgba(255,255,255,0.92)', color: 'var(--fg-primary)', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em' }}>
-              {sec.placeholderLabel}
-            </div>
+            {!playing && (
+              <>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(6,46,64,0) 50%, rgba(6,46,64,0.6) 100%)' }} />
+                <button onClick={() => { if (heroVideo) setPlaying(true); else navigate('/contact'); }}
+                  title={heroVideo ? 'Riproduci video' : 'Nessun video caricato — contattaci per un tour'}
+                  style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 92, height: 92, borderRadius: '50%', background: 'var(--color-mint-500)', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: '0 12px 40px rgba(6,46,64,0.5), var(--shadow-cta)' }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--color-white)" style={{ marginLeft: 3 }}><path d="M8 5v14l11-7z" /></svg>
+                </button>
+                <div style={{ position: 'absolute', left: 18, right: 18, bottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-white)', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.04em' }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-danger-500)', boxShadow: '0 0 0 3px rgba(180,35,24,0.3)' }} />
+                    {displayDuration}
+                    <span>· {sec.locationLabel}</span>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-100)' }}>{heroVideo?.size || '4K · HDR'}</span>
+                </div>
+                <div style={{ position: 'absolute', top: 18, left: 18, padding: '6px 10px', background: 'rgba(255,255,255,0.92)', color: 'var(--fg-primary)', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em' }}>
+                  {displayLabel}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

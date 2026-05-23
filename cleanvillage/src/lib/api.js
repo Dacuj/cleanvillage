@@ -206,6 +206,7 @@ export async function listVideos({ liveOnly = false } = {}) {
     id: v.id, title: v.title, duration: v.duration, spot: v.spot,
     size: v.size, status: v.status, date: v.created_at?.slice(0, 10),
     description: v.description, file_url: v.file_url, thumbnail_url: v.thumbnail_url,
+    storage_path: v.storage_path,
     product_id: v.product_id,
   }));
 }
@@ -214,7 +215,8 @@ export async function upsertVideo(v) {
   const payload = {
     id: v.id, title: v.title, description: v.description, spot: v.spot,
     duration: v.duration, size: v.size, status: v.status,
-    file_url: v.file_url, thumbnail_url: v.thumbnail_url, product_id: v.product_id || null,
+    file_url: v.file_url, storage_path: v.storage_path,
+    thumbnail_url: v.thumbnail_url, product_id: v.product_id || null,
   };
   const { data, error } = await supabase.from('videos').upsert(payload).select().single();
   if (error) throw error;
@@ -223,12 +225,49 @@ export async function upsertVideo(v) {
 
 export async function deleteVideo(id) {
   const { data: vid } = await supabase
-    .from('videos').select('storage_path').eq('id', id).maybeSingle();
+    .from('videos').select('storage_path, thumbnail_url').eq('id', id).maybeSingle();
   if (vid?.storage_path) {
-    await supabase.storage.from('videos').remove([vid.storage_path]);
+    await supabase.storage.from('videos').remove([vid.storage_path]).catch(() => {});
+  }
+  if (vid?.thumbnail_url) {
+    const m = vid.thumbnail_url.match(/\/object\/public\/video-thumbnails\/(.+)$/);
+    if (m) {
+      await supabase.storage.from('video-thumbnails').remove([decodeURIComponent(m[1])]).catch(() => {});
+    }
   }
   const { error } = await supabase.from('videos').delete().eq('id', id);
   if (error) throw error;
+}
+
+// Upload a video file to the `videos` bucket and return a public URL + the
+// storage path (kept on the row so we can remove it on delete).
+export async function uploadVideoFile(file) {
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from('videos')
+    .upload(path, file, { contentType: file.type || 'video/mp4', upsert: false });
+  if (upErr) throw upErr;
+  const { data: pub } = supabase.storage.from('videos').getPublicUrl(path);
+  return { url: pub.publicUrl, storage_path: path };
+}
+
+export async function uploadVideoThumbnail(file) {
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from('video-thumbnails')
+    .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
+  if (upErr) throw upErr;
+  const { data: pub } = supabase.storage.from('video-thumbnails').getPublicUrl(path);
+  return { url: pub.publicUrl, storage_path: path };
+}
+
+export async function removeVideoStorage(storagePath) {
+  if (!isSupabaseConfigured || !storagePath) return;
+  await supabase.storage.from('videos').remove([storagePath]).catch(() => {});
 }
 
 // --------------------------------------------------------------
