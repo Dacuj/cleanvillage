@@ -30,7 +30,7 @@ export default function LegalPage({ slug }) {
             <span style={{ color: 'var(--fg-primary)' }}>{page.title}</span>
           </div>
           <Eyebrow>{co.name}</Eyebrow>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 'clamp(36px, 5vw, 60px)', letterSpacing: '-0.04em', margin: '14px 0 0', lineHeight: 1.04, textWrap: 'balance', maxWidth: '22ch' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(36px, 5vw, 60px)', letterSpacing: '-0.04em', margin: '14px 0 0', lineHeight: 1.04, textWrap: 'balance', maxWidth: '22ch' }}>
             {page.title}
           </h1>
           {page.subtitle && (

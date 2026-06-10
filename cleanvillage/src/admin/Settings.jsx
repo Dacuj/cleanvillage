@@ -81,9 +81,10 @@ export default function AdminSettings() {
       <Panel title="Mittente delle email" padding="22px 26px">
         <Helper>
           Tutte le email automatiche (notifiche interne e conferme al cliente) usano i parametri qui sotto.
-          L'invio reale richiede un'integrazione lato server (SMTP, Resend, ecc.): le credenziali vengono salvate
-          per essere lette dalla function in <code style={Kbd}>cleanvillage/api/</code>. Fino a quando la function
-          non è collegata, l'interruttore <b>"Invio attivo"</b> resta off e nessuna mail parte.
+          L'invio avviene tramite <b>Resend.com</b>: crea un account gratuito, genera una API key e falla
+          impostare come variabile <code style={Kbd}>RESEND_API_KEY</code> nelle impostazioni del deploy
+          (Vercel → Settings → Environment Variables). Per sicurezza la chiave <b>non</b> va incollata qui:
+          tutto ciò che scrivi in questa pagina è leggibile dal sito pubblico.
         </Helper>
         <Grid cols={2}>
           <AField label="Nome mittente" hint='Es. "Clean Village Srl"'>
@@ -100,49 +101,19 @@ export default function AdminSettings() {
           </AField>
         </Grid>
         <Grid cols={2} style={{ marginTop: 14 }}>
-          <AField label="Provider di invio">
-            <ASelect value={settings.provider || 'smtp'} onChange={(e) => update('emailSettings.provider', e.target.value)}>
-              <option value="smtp">SMTP (es. Gmail, Aruba)</option>
-              <option value="resend">Resend.com</option>
-              <option value="sendgrid">SendGrid</option>
-            </ASelect>
-          </AField>
-          <AField label="Invio attivo" hint="Tienilo off finché non hai collegato l'API key del provider">
+          <AField label="Invio attivo" hint="Spegnilo per bloccare tutte le email automatiche senza toccare il deploy">
             <ASelect value={settings.enabled ? '1' : '0'} onChange={(e) => update('emailSettings.enabled', e.target.value === '1')}>
               <option value="0">No · disattivato</option>
               <option value="1">Sì · invia mail automatiche</option>
             </ASelect>
           </AField>
+          <AField label="Stato integrazione" hint="L'invio funziona quando RESEND_API_KEY è impostata sul deploy e l'interruttore è attivo">
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 12px', fontSize: 13, color: settings.enabled ? 'var(--color-success-500)' : 'var(--fg-muted)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: settings.enabled ? 'var(--color-success-500)' : 'var(--color-ice-300)' }} />
+              {settings.enabled ? 'Attivo (se la API key è configurata sul server)' : 'Disattivato'}
+            </div>
+          </AField>
         </Grid>
-
-        {settings.provider === 'smtp' && (
-          <>
-            <SubHeading>Credenziali SMTP</SubHeading>
-            <Grid cols={2}>
-              <AField label="Server SMTP" hint='Es. smtp.gmail.com'>
-                <AInput value={settings.smtpHost || ''} onChange={(e) => update('emailSettings.smtpHost', e.target.value)} placeholder="smtp.gmail.com" />
-              </AField>
-              <AField label="Porta" hint="587 (TLS) o 465 (SSL)">
-                <AInput value={settings.smtpPort || ''} onChange={(e) => update('emailSettings.smtpPort', e.target.value)} placeholder="587" />
-              </AField>
-              <AField label="Utente SMTP">
-                <AInput value={settings.smtpUser || ''} onChange={(e) => update('emailSettings.smtpUser', e.target.value)} placeholder="cleanvillagesrl@gmail.com" />
-              </AField>
-              <AField label="Password / App password" hint="Per Gmail: usa una 'app password' generata in Google Account">
-                <AInput type="password" value={settings.smtpSecret || ''} onChange={(e) => update('emailSettings.smtpSecret', e.target.value)} placeholder="••••••••••••••••" />
-              </AField>
-            </Grid>
-          </>
-        )}
-
-        {(settings.provider === 'resend' || settings.provider === 'sendgrid') && (
-          <>
-            <SubHeading>API key del provider</SubHeading>
-            <AField label={`${settings.provider === 'resend' ? 'Resend' : 'SendGrid'} API key`} hint="Letta dalla function — non viene esposta sul frontend">
-              <AInput type="password" value={settings.smtpSecret || ''} onChange={(e) => update('emailSettings.smtpSecret', e.target.value)} placeholder="re_••••••••••••" />
-            </AField>
-          </>
-        )}
 
         <SubHeading>Firma & destinatari extra</SubHeading>
         <AField label="Firma" hint="Riga finale inclusa in tutte le mail automatiche">

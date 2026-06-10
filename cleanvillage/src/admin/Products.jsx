@@ -246,7 +246,7 @@ function ProductModal({ open, product, cats, onClose, onSave, onDelete, onImages
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-teal-500)' }}>{form.sku || 'COD-000'}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 22, letterSpacing: '-0.03em' }}>{form.price || '€0'}</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 22, letterSpacing: '-0.03em' }}>{form.price || '€0'}</span>
               {form.stock === 'in' && <Badge tone="mint">Disponibile · {form.count}</Badge>}
               {form.stock === 'low' && <Badge tone="amber">Ultimi {form.count} pz</Badge>}
               {form.stock === 'out' && <Badge tone="danger">Su ordinazione</Badge>}

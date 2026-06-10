@@ -150,7 +150,7 @@ function AdminSidebar({ page, onNavigate }) {
       <div style={{ padding: '22px 22px 22px', borderBottom: '1px solid var(--color-teal-700)' }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
           <svg width="130" height="26" viewBox="0 0 130 26" fill="none">
-            <text x="0" y="20" fontFamily="Outfit, sans-serif" fontWeight="300" fontSize="20" fill="white" letterSpacing="-0.03em">CleanVillage</text>
+            <text x="0" y="20" fontFamily="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" fontWeight="600" fontSize="20" fill="white" letterSpacing="-0.03em">CleanVillage</text>
           </svg>
         </Link>
         <div style={{ marginTop: 6, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-300)', fontWeight: 600 }}>Console interna · v2.5</div>
@@ -269,7 +269,7 @@ export function AdminPage({ eyebrow, title, subtitle, actions, children }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'end', gap: 20, marginBottom: isMobile ? 22 : 32, flexWrap: 'wrap' }}>
         <div style={{ minWidth: 0 }}>
           {eyebrow && <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-700)', marginBottom: 8 }}>{eyebrow}</div>}
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: isMobile ? 28 : 36, letterSpacing: '-0.035em', margin: 0, lineHeight: 1.06, color: 'var(--fg-primary)' }}>{title}</h1>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: isMobile ? 28 : 36, letterSpacing: '-0.035em', margin: 0, lineHeight: 1.06, color: 'var(--fg-primary)' }}>{title}</h1>
           {subtitle && <p style={{ margin: '10px 0 0', fontSize: 14, color: 'var(--fg-secondary)', lineHeight: 1.5, maxWidth: '70ch' }}>{subtitle}</p>}
         </div>
         {actions && <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>{actions}</div>}
@@ -339,7 +339,7 @@ export function Panel({ title, action, children, padding = '22px 24px' }) {
 export function Modal({ open, onClose, title, width = 720, children, footer }) {
   if (!open) return null;
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(15,35,48,0.55)', backdropFilter: 'blur(4px)', display: 'grid', placeItems: 'center', zIndex: 50, padding: 24 }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', display: 'grid', placeItems: 'center', zIndex: 50, padding: 24 }}>
       <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: width, maxHeight: '90vh', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-pop)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 26px', borderBottom: '1px solid var(--border-subtle)' }}>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 18, letterSpacing: '-0.02em' }}>{title}</span>

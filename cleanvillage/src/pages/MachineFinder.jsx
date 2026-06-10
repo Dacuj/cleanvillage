@@ -82,8 +82,8 @@ export default function MachineFinder() {
             <span style={{ color: 'var(--fg-primary)' }}>Scopri la macchina ideale</span>
           </div>
           <Eyebrow>Assistente AI · Beta</Eyebrow>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 'clamp(32px, 4.6vw, 56px)', letterSpacing: '-0.04em', margin: '12px 0 14px', lineHeight: 1.04, textWrap: 'balance', maxWidth: '24ch' }}>
-            Trova la macchina <em style={{ fontStyle: 'normal', color: 'var(--color-teal-500)', fontWeight: 300 }}>ideale</em> per il tuo lavoro.
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(32px, 4.6vw, 56px)', letterSpacing: '-0.04em', margin: '12px 0 14px', lineHeight: 1.04, textWrap: 'balance', maxWidth: '24ch' }}>
+            Trova la macchina <em style={{ fontStyle: 'normal', color: 'var(--color-teal-500)', fontWeight: 650 }}>ideale</em> per il tuo lavoro.
           </h1>
           <p style={{ margin: 0, color: 'var(--fg-secondary)', fontSize: isMobile ? 15 : 17, maxWidth: '60ch', lineHeight: 1.6 }}>
             Descrivi il problema all'assistente: la chat ti farà qualche domanda mirata e proporrà la macchina più adatta dal nostro catalogo. Per offerte e disponibilità in tempo reale, chiedi sempre conferma al nostro ufficio commerciale.

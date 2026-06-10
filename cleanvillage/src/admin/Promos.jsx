@@ -163,10 +163,10 @@ function PromoEditor({ index, slot, content, data, update, onRemove }) {
 
 function PromoPreview({ data, img }) {
   const COLORS = {
-    mint: { bg: 'linear-gradient(135deg, #E6FBEE 0%, #C8F5D8 100%)', fg: 'var(--color-mint-800)' },
-    teal: { bg: 'linear-gradient(135deg, #E8F2F5 0%, #C6DEE5 100%)', fg: 'var(--color-teal-500)' },
+    mint: { bg: 'linear-gradient(135deg, #E6FBEE 0%, #D8E8FD 100%)', fg: 'var(--color-mint-800)' },
+    teal: { bg: 'linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%)', fg: 'var(--color-teal-500)' },
     amber: { bg: 'linear-gradient(135deg, #FBE7C8 0%, #FBE2C0 100%)', fg: '#7A4504' },
-    ice: { bg: 'linear-gradient(135deg, #F5F7F8 0%, #EBEFF1 100%)', fg: 'var(--fg-primary)' },
+    ice: { bg: 'linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%)', fg: 'var(--fg-primary)' },
   };
   const c = COLORS[data.color] || COLORS.mint;
   return (

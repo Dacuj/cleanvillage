@@ -5,9 +5,9 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 
 const LEVELS = ['Base', 'Avanzato', 'Specialist'];
 const KINDS = [
-  { v: 'safety', l: 'Sicurezza', bg: 'linear-gradient(135deg, #E8F2F5 0%, #C6DEE5 100%)' },
-  { v: 'machine', l: 'Macchine', bg: 'linear-gradient(135deg, #F5F7F8 0%, #EBEFF1 100%)' },
-  { v: 'chemicals', l: 'Detergenti / Chimica', bg: 'linear-gradient(135deg, #E6FBEE 0%, #C8F5D8 100%)' },
+  { v: 'safety', l: 'Sicurezza', bg: 'linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%)' },
+  { v: 'machine', l: 'Macchine', bg: 'linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%)' },
+  { v: 'chemicals', l: 'Detergenti / Chimica', bg: 'linear-gradient(135deg, #E6FBEE 0%, #D8E8FD 100%)' },
   { v: 'sales', l: 'Gare / commerciale', bg: 'linear-gradient(135deg, #FBE7C8 0%, #FBE2C0 100%)' },
 ];
 

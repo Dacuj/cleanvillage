@@ -149,7 +149,7 @@ function VideoThumb({ video }) {
         <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <span style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
           <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', display: 'grid', placeItems: 'center' }}>
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="#0A4D68" style={{ marginLeft: 1 }}><path d="M8 5v14l11-7z" /></svg>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="#3A3A3C" style={{ marginLeft: 1 }}><path d="M8 5v14l11-7z" /></svg>
           </span>
         </span>
         {video.duration && (
@@ -164,7 +164,7 @@ function VideoThumb({ video }) {
         <video src={video.file_url} preload="metadata" muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <span style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.2)' }}>
           <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', display: 'grid', placeItems: 'center' }}>
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="#0A4D68" style={{ marginLeft: 1 }}><path d="M8 5v14l11-7z" /></svg>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="#3A3A3C" style={{ marginLeft: 1 }}><path d="M8 5v14l11-7z" /></svg>
           </span>
         </span>
         {video.duration && (
@@ -175,7 +175,7 @@ function VideoThumb({ video }) {
   }
   // Placeholder when no file uploaded yet
   return (
-    <div style={{ position: 'relative', width: 96, aspectRatio: '16/9', background: 'linear-gradient(135deg, #2C3E4A 0%, #0F2330 100%)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.5)' }}>
+    <div style={{ position: 'relative', width: 96, aspectRatio: '16/9', background: 'linear-gradient(135deg, #48484A 0%, #1D1D1F 100%)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.5)' }}>
       <AdminIcon name="video-off" size={20} />
     </div>
   );

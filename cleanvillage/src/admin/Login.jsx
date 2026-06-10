@@ -34,7 +34,7 @@ export default function AdminLogin() {
         border: '1px solid var(--border-subtle)',
         borderRadius: 'var(--radius-lg)',
         padding: '40px 36px',
-        boxShadow: '0 10px 40px rgba(10, 77, 104, 0.08)',
+        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
           <span style={{
@@ -54,7 +54,7 @@ export default function AdminLogin() {
           </div>
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 28, letterSpacing: '-0.025em', color: 'var(--fg-primary)', margin: '24px 0 6px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 28, letterSpacing: '-0.025em', color: 'var(--fg-primary)', margin: '24px 0 6px' }}>
           Accedi al pannello
         </h1>
         <p style={{ fontSize: 13, color: 'var(--fg-secondary)', margin: 0, marginBottom: 28, lineHeight: 1.55 }}>
@@ -111,7 +111,7 @@ export default function AdminLogin() {
               marginTop: 6, padding: '12px 20px',
               background: 'var(--cta-bg, var(--color-mint-500))',
               color: 'var(--color-white)', border: 'none',
-              borderRadius: 'var(--radius-sm)',
+              borderRadius: 'var(--radius-pill)',
               fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 14, letterSpacing: '-0.01em',
               cursor: busy ? 'wait' : 'pointer',
               opacity: (busy || !isSupabaseConfigured) ? 0.65 : 1,

@@ -128,7 +128,7 @@ export default function Product() {
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>RIF · {product.sku}</span>
               <span style={{ marginLeft: 'auto' }}><StockPill status={product.stock} count={product.count} /></span>
             </div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 3vw, 38px)', letterSpacing: '-0.035em', margin: '0 0 16px', lineHeight: 1.06, textWrap: 'balance' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(28px, 3vw, 38px)', letterSpacing: '-0.035em', margin: '0 0 16px', lineHeight: 1.06, textWrap: 'balance' }}>
               {product.name}
             </h1>
             <p style={{ margin: '0 0 24px', color: 'var(--fg-secondary)', fontSize: 15, lineHeight: 1.6 }}>
@@ -148,13 +148,13 @@ export default function Product() {
                 <div>
                   <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--fg-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Prezzo base</div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 40, letterSpacing: '-0.035em', color: 'var(--fg-primary)', lineHeight: 1 }}>{product.price}</span>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 40, letterSpacing: '-0.035em', color: 'var(--fg-primary)', lineHeight: 1 }}>{product.price}</span>
                     <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>+ IVA</span>
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-mint-700)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Risparmio fino al</div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 32, letterSpacing: '-0.03em', color: 'var(--color-mint-700)', marginTop: 4, lineHeight: 1 }}>−14%</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 32, letterSpacing: '-0.03em', color: 'var(--color-mint-700)', marginTop: 4, lineHeight: 1 }}>−14%</div>
                 </div>
               </div>
 
@@ -238,7 +238,7 @@ export default function Product() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: 32 }}>
             <div>
               <Eyebrow>Della stessa categoria</Eyebrow>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 32, letterSpacing: '-0.03em', margin: '12px 0 0' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 32, letterSpacing: '-0.03em', margin: '12px 0 0' }}>
                 Articoli correlati.
               </h2>
             </div>
@@ -373,7 +373,7 @@ function ReviewsList() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 32, paddingBottom: 28, borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 64, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--fg-primary)' }}>4,8</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 64, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--fg-primary)' }}>4,8</div>
           <div style={{ color: '#E5A302', fontSize: 16, letterSpacing: '2px', marginTop: 6 }}>★★★★★</div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', marginTop: 6 }}>17 recensioni verificate</div>
         </div>

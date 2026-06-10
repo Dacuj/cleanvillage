@@ -22,7 +22,7 @@ export default function About() {
             <span style={{ color: 'var(--fg-primary)' }}>Azienda</span>
           </div>
           <Eyebrow>{page.eyebrow}</Eyebrow>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 'clamp(36px, 5.4vw, 68px)', letterSpacing: '-0.04em', margin: '14px 0 22px', lineHeight: 1.02, textWrap: 'balance', maxWidth: '22ch' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(36px, 5.4vw, 68px)', letterSpacing: '-0.04em', margin: '14px 0 22px', lineHeight: 1.02, textWrap: 'balance', maxWidth: '22ch' }}>
             {page.title}
           </h1>
           <p style={{ margin: 0, color: 'var(--fg-secondary)', fontSize: isMobile ? 15 : 17, maxWidth: '64ch', lineHeight: 1.7 }}>
@@ -33,7 +33,7 @@ export default function About() {
 
       <section style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '48px 20px' : '88px 32px' }}>
         <Eyebrow>Quattro principi</Eyebrow>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 3.6vw, 40px)', letterSpacing: '-0.03em', margin: '14px 0 32px', maxWidth: '24ch' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(28px, 3.6vw, 40px)', letterSpacing: '-0.03em', margin: '14px 0 32px', maxWidth: '24ch' }}>
           Cosa ci distingue.
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? 16 : 20 }}>
@@ -56,7 +56,7 @@ export default function About() {
           <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.3fr', gap: isMobile ? 28 : 56, alignItems: 'center' }}>
             <div>
               <Eyebrow>{videoPage.eyebrow}</Eyebrow>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(26px, 3.4vw, 38px)', letterSpacing: '-0.03em', margin: '14px 0 16px', maxWidth: '20ch', lineHeight: 1.1 }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(26px, 3.4vw, 38px)', letterSpacing: '-0.03em', margin: '14px 0 16px', maxWidth: '20ch', lineHeight: 1.1 }}>
                 {videoPage.title}
               </h2>
               <p style={{ margin: 0, color: 'var(--fg-secondary)', fontSize: isMobile ? 15 : 16, lineHeight: 1.65, maxWidth: '46ch' }}>
@@ -68,7 +68,7 @@ export default function About() {
                 </div>
               )}
             </div>
-            <div style={{ aspectRatio: '16/9', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-subtle)', background: '#0F2330', position: 'relative' }}>
+            <div style={{ aspectRatio: '16/9', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-subtle)', background: '#1D1D1F', position: 'relative' }}>
               {videoPage.embedUrl ? (
                 <iframe
                   title={videoPage.embedTitle || 'Video Clean Village'}
@@ -95,7 +95,7 @@ export default function About() {
         <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: isMobile ? 28 : 56, alignItems: 'center' }}>
           <div>
             <Eyebrow dark>Sede operativa</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(26px, 3.4vw, 38px)', letterSpacing: '-0.03em', margin: '14px 0 18px', color: 'var(--color-white)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(26px, 3.4vw, 38px)', letterSpacing: '-0.03em', margin: '14px 0 18px', color: 'var(--color-white)' }}>
               {co.name}
             </h2>
             <div style={{ fontSize: 15, color: 'var(--color-teal-100)', lineHeight: 1.7 }}>

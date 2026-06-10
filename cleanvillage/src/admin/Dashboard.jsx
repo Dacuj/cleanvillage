@@ -197,7 +197,7 @@ function KPI({ title, value, trend, tone = 'teal', icon, onClick }) {
           <AdminIcon name={icon} size={16} />
         </span>
       </div>
-      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 42, letterSpacing: '-0.04em', color: 'var(--fg-primary)', lineHeight: 1, marginTop: 4 }}>{value}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 42, letterSpacing: '-0.04em', color: 'var(--fg-primary)', lineHeight: 1, marginTop: 4 }}>{value}</div>
       <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginTop: 2 }}>{trend}</div>
     </div>
   );
@@ -222,7 +222,7 @@ function Mini({ title, value, sub, icon, onClick }) {
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>{title}</div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 2 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 22, letterSpacing: '-0.025em', color: 'var(--fg-primary)' }}>{value}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 22, letterSpacing: '-0.025em', color: 'var(--fg-primary)' }}>{value}</span>
           <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{sub}</span>
         </div>
       </div>

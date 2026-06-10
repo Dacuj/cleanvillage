@@ -253,24 +253,16 @@ export const DEFAULT_CONTENT = {
     videoPoster: null,
     hqMap: null,
   },
-  // Email outbound config & templates. Used by the admin to configure
-  // where notifications are sent and the body of each transactional mail.
-  // Actual sending requires a backend SMTP/Resend integration — the
-  // settings here are stored so a future serverless function can read
-  // them. See SETTINGS.md for wiring instructions.
+  // Email outbound config & templates, read by the serverless function
+  // `api/notify.js`. Sending goes through Resend: set RESEND_API_KEY in the
+  // deploy environment, then flip `enabled` from /admin/settings.
+  // IMPORTANT: never store API keys in here — this row is publicly readable.
   emailSettings: {
     senderName: 'Clean Village Srl',
     senderEmail: 'cleanvillagesrl@gmail.com',
     replyTo: 'direzione.cleanvillage@gmail.com',
     notificationEmail: 'cleanvillagesrl@gmail.com',
-    // Outbound provider: 'smtp', 'resend', 'sendgrid'.
-    provider: 'smtp',
-    smtpHost: 'smtp.gmail.com',
-    smtpPort: '587',
-    smtpUser: '',
-    smtpSecret: '',
-    // Off until an integration is configured. The toggle is informational
-    // — the actual sending must be wired in `cleanvillage/api/`.
+    // Off until RESEND_API_KEY is configured on the deploy.
     enabled: false,
     bccDirectionEmail: true,
     signatureLine: 'Clean Village Srl · Villaricca (NA) · cleanvillage.it',

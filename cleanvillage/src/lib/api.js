@@ -8,6 +8,57 @@ import {
 // so the storefront still renders. Admin writes always require Supabase.
 
 // --------------------------------------------------------------
+// UPLOAD GUARD-RAILS — validated client-side so the admin gets an
+// immediate, human error message instead of a cryptic storage one.
+// --------------------------------------------------------------
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
+const MAX_IMAGE_MB = 8;
+const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+const MAX_VIDEO_MB = 300;
+
+export function validateImageFile(file) {
+  if (!file) throw new Error('Nessun file selezionato.');
+  if (!IMAGE_TYPES.includes(file.type)) {
+    throw new Error('Formato non supportato. Usa una foto JPG, PNG, WEBP, AVIF o GIF.');
+  }
+  if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+    throw new Error(`L'immagine pesa ${(file.size / 1024 / 1024).toFixed(1)} MB: il massimo è ${MAX_IMAGE_MB} MB. Riducila e riprova.`);
+  }
+}
+
+export function validateVideoFile(file) {
+  if (!file) throw new Error('Nessun file selezionato.');
+  if (!VIDEO_TYPES.includes(file.type)) {
+    throw new Error('Formato non supportato. Usa un video MP4, WEBM o MOV.');
+  }
+  if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+    throw new Error(`Il video pesa ${(file.size / 1024 / 1024).toFixed(0)} MB: il massimo è ${MAX_VIDEO_MB} MB. Comprimilo e riprova.`);
+  }
+}
+
+// Map raw Supabase/storage errors to actionable Italian messages.
+function friendlyStorageError(err, fallback = 'Errore durante il caricamento. Riprova.') {
+  const msg = String(err?.message || err || '');
+  if (/bucket.*not.*found/i.test(msg)) return new Error('Spazio di archiviazione non trovato: lancia le migration Supabase dal pannello (banner in alto).');
+  if (/row-level security|not authorized|403/i.test(msg)) return new Error('Non hai i permessi: assicurati di aver fatto il login nel pannello admin.');
+  if (/payload too large|exceeded|413/i.test(msg)) return new Error('Il file è troppo grande per il piano Supabase attuale.');
+  if (/network|fetch|failed to fetch/i.test(msg)) return new Error('Connessione assente o instabile. Controlla la rete e riprova.');
+  return new Error(`${fallback} (${msg.slice(0, 140)})`);
+}
+
+// Fire-and-forget call to the transactional-email function. Never blocks or
+// breaks the caller: notifications are best-effort by design.
+function notifyServer(type, data) {
+  try {
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type, data }),
+    }).catch(() => {});
+  } catch { /* */ }
+}
+
+// --------------------------------------------------------------
 // CATEGORIES
 // --------------------------------------------------------------
 export async function listCategories() {
@@ -146,14 +197,15 @@ export async function deleteProduct(id) {
 // PRODUCT IMAGES
 // --------------------------------------------------------------
 export async function uploadProductImage(productId, file, { isPrimary = false } = {}) {
-  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato: impossibile caricare immagini.');
+  validateImageFile(file);
   const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
   const path = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
   const { error: upErr } = await supabase.storage
     .from('product-images')
     .upload(path, file, { contentType: file.type, upsert: false });
-  if (upErr) throw upErr;
+  if (upErr) throw friendlyStorageError(upErr, "Impossibile caricare l'immagine del prodotto.");
 
   const { data: pub } = supabase.storage.from('product-images').getPublicUrl(path);
 
@@ -242,25 +294,27 @@ export async function deleteVideo(id) {
 // Upload a video file to the `videos` bucket and return a public URL + the
 // storage path (kept on the row so we can remove it on delete).
 export async function uploadVideoFile(file) {
-  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato: impossibile caricare video.');
+  validateVideoFile(file);
   const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '');
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error: upErr } = await supabase.storage
     .from('videos')
     .upload(path, file, { contentType: file.type || 'video/mp4', upsert: false });
-  if (upErr) throw upErr;
+  if (upErr) throw friendlyStorageError(upErr, 'Impossibile caricare il video.');
   const { data: pub } = supabase.storage.from('videos').getPublicUrl(path);
   return { url: pub.publicUrl, storage_path: path };
 }
 
 export async function uploadVideoThumbnail(file) {
-  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato: impossibile caricare immagini.');
+  validateImageFile(file);
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error: upErr } = await supabase.storage
     .from('video-thumbnails')
     .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
-  if (upErr) throw upErr;
+  if (upErr) throw friendlyStorageError(upErr, 'Impossibile caricare la copertina del video.');
   const { data: pub } = supabase.storage.from('video-thumbnails').getPublicUrl(path);
   return { url: pub.publicUrl, storage_path: path };
 }
@@ -307,6 +361,8 @@ export async function createQuote(quote) {
     timeline: quote.timeline, attachments: quote.attachments || [],
   }).select().single();
   if (error) throw error;
+  // Best-effort transactional emails (internal alert + customer receipt).
+  notifyServer('quote', { ...quote, reference: data.id });
   return data;
 }
 
@@ -343,13 +399,14 @@ export async function upsertSiteContent(payload) {
 }
 
 export async function uploadLandingImage(slotId, file) {
-  if (!isSupabaseConfigured) throw new Error('Supabase non configurato');
+  if (!isSupabaseConfigured) throw new Error('Supabase non configurato: impossibile caricare immagini.');
+  validateImageFile(file);
   const safeSlot = String(slotId).replace(/[^a-zA-Z0-9_-]/g, '_');
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const path = `${safeSlot}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error: upErr } = await supabase.storage
     .from('landing-images').upload(path, file, { contentType: file.type, upsert: false });
-  if (upErr) throw upErr;
+  if (upErr) throw friendlyStorageError(upErr, "Impossibile caricare l'immagine.");
   const { data: pub } = supabase.storage.from('landing-images').getPublicUrl(path);
   return { url: pub.publicUrl, storage_path: path };
 }

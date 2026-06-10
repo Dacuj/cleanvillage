@@ -74,7 +74,7 @@ export default function Catalog() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 24, flexWrap: 'wrap' }}>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 'clamp(40px, 5vw, 60px)', letterSpacing: '-0.04em', margin: 0, lineHeight: 1.02, textWrap: 'balance', maxWidth: '18ch' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(40px, 5vw, 60px)', letterSpacing: '-0.04em', margin: 0, lineHeight: 1.02, textWrap: 'balance', maxWidth: '18ch' }}>
                 {currentCat ? currentCat.label : 'Catalogo prodotti.'}
               </h1>
               <p style={{ margin: '14px 0 0', color: 'var(--fg-secondary)', fontSize: 15, fontWeight: 400, maxWidth: '62ch' }}>

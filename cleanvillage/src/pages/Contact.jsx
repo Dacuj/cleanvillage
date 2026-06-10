@@ -66,7 +66,7 @@ export default function Contact() {
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 28 : 48, alignItems: 'end' }}>
             <div>
               <Eyebrow>{cp.eyebrow}</Eyebrow>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 'clamp(36px, 5.4vw, 68px)', letterSpacing: '-0.04em', margin: '14px 0 0', lineHeight: 1.02, textWrap: 'balance', maxWidth: '18ch' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(36px, 5.4vw, 68px)', letterSpacing: '-0.04em', margin: '14px 0 0', lineHeight: 1.02, textWrap: 'balance', maxWidth: '18ch' }}>
                 {cp.title}
               </h1>
               <p style={{ margin: '18px 0 0', color: 'var(--fg-secondary)', fontSize: isMobile ? 15 : 16, maxWidth: '56ch', lineHeight: 1.6 }}>
@@ -207,7 +207,7 @@ function QuickStat({ icon, label, value, small }) {
       </span>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600 }}>{label}</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 24, letterSpacing: '-0.03em', color: 'var(--fg-primary)', marginTop: 2, lineHeight: 1.1 }}>{value}</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 24, letterSpacing: '-0.03em', color: 'var(--fg-primary)', marginTop: 2, lineHeight: 1.1 }}>{value}</div>
         <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginTop: 3 }}>{small}</div>
       </div>
     </div>
@@ -305,7 +305,7 @@ function HQCard({ co }) {
   const mapEmbed = `https://www.google.com/maps?q=${encodeURIComponent(opAddress)}&output=embed`;
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-      <div style={{ aspectRatio: '5/3', background: '#EBEFF1', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: '5/3', background: '#E8E8ED', position: 'relative', overflow: 'hidden' }}>
         <iframe
           title={`Mappa ${co.name}`}
           src={mapEmbed}
@@ -351,7 +351,7 @@ function ContactSuccess({ onReset, onNav }) {
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--color-mint-50)', color: 'var(--color-mint-700)', display: 'grid', placeItems: 'center', margin: '0 auto 24px' }}>
           <Icon name="check" size={32} strokeWidth={2} />
         </div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 36, letterSpacing: '-0.035em', margin: '0 0 14px' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 36, letterSpacing: '-0.035em', margin: '0 0 14px' }}>
           Richiesta ricevuta.
         </h2>
         <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: '0 0 18px' }}>

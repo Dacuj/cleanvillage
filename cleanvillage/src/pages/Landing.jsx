@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon, Button, TrustBar, Eyebrow, Spec } from '../components/ui.jsx';
 import { ProductCard, ProductIllustration } from '../components/product.jsx';
 import { ImageSlot } from '../components/ImageSlot.jsx';
+import { Reveal } from '../components/Reveal.jsx';
 import { useCategories, useBrands, useProducts, useCourses, useIndustries, useVideos } from '../lib/storefront.js';
 import { useIsMobile } from '../lib/useBreakpoint.js';
 import { useSiteContent, resolveImageSlot } from '../lib/siteContent.js';
@@ -39,7 +40,7 @@ function Hero() {
     return (
       <>
         {before}
-        <em style={{ fontStyle: 'normal', color: 'var(--color-teal-500)', fontWeight: 300 }}>{accent}</em>
+        <em style={{ fontStyle: 'normal', fontWeight: 700, background: 'linear-gradient(100deg, var(--color-mint-500), #4DA3F5)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'var(--color-mint-500)' }}>{accent}</em>
         {after}
       </>
     );
@@ -50,10 +51,10 @@ function Hero() {
       <TrustBar height={3} />
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '40px 20px 0' : '72px 32px 0' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 1fr', gap: isMobile ? 36 : 64, alignItems: 'center' }}>
-          <div>
+          <Reveal>
             <Eyebrow>{hero.eyebrow}</Eyebrow>
             <h1 style={{
-              fontFamily: 'var(--font-display)', fontWeight: 200,
+              fontFamily: 'var(--font-display)', fontWeight: 700,
               fontSize: 'clamp(38px, 6.6vw, 84px)', lineHeight: 0.98,
               letterSpacing: '-0.04em', color: 'var(--fg-primary)',
               margin: '24px 0 26px', textWrap: 'balance'
@@ -82,13 +83,15 @@ function Hero() {
                 </div>
               </div>
             )}
-          </div>
-          {!isMobile && <HeroVisual hero={hero} />}
+          </Reveal>
+          {!isMobile && <Reveal delay={140}><HeroVisual hero={hero} /></Reveal>}
         </div>
         {/* stat ribbon */}
         <div style={{ marginTop: isMobile ? 36 : 56, padding: isMobile ? '24px 0' : '32px 0', borderTop: '1px solid var(--border-subtle)', display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : `repeat(${Math.max(2, hero.stats.length)}, 1fr)`, gap: isMobile ? 20 : 32 }}>
           {hero.stats.map((s, i) => (
-            <Stat key={i} value={s.value} unit={s.unit} label={s.label} accent={s.accent} />
+            <Reveal key={i} delay={i * 90}>
+              <Stat value={s.value} unit={s.unit} label={s.label} accent={s.accent} />
+            </Reveal>
           ))}
         </div>
       </div>
@@ -100,8 +103,8 @@ function Stat({ value, unit, label, accent }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 56, lineHeight: 1, letterSpacing: '-0.04em', color: accent ? 'var(--color-teal-500)' : 'var(--fg-primary)' }}>{value}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 22, color: 'var(--fg-muted)', letterSpacing: '-0.03em' }}>{unit}</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 56, lineHeight: 1, letterSpacing: '-0.04em', color: accent ? 'var(--color-mint-500)' : 'var(--fg-primary)' }}>{value}</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 22, color: 'var(--fg-muted)', letterSpacing: '-0.03em' }}>{unit}</span>
       </div>
       <span style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600 }}>{label}</span>
     </div>
@@ -117,39 +120,39 @@ function HeroVisual({ hero }) {
         aspectRatio: '4/5',
         borderRadius: 'var(--radius-lg)',
         overflow: 'hidden',
-        background: 'linear-gradient(160deg, #E8F2F5 0%, #C6DEE5 60%, #6FA1B0 100%)',
+        background: 'linear-gradient(160deg, #F5F5F7 0%, #E8E8ED 60%, #C7C7CC 100%)',
         border: '1px solid var(--border-subtle)',
         position: 'relative'
       }}>
         <ImageSlot id="heroImage" placeholder="Trascina qui la foto principale dell'hero" />
-        <svg viewBox="0 0 400 500" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" fill="none" stroke="#0A4D68" strokeWidth="1.6">
+        <svg viewBox="0 0 400 500" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" fill="none" stroke="#3A3A3C" strokeWidth="1.6">
           <g transform="translate(40, 130)">
             <rect x="20" y="80" width="280" height="140" rx="14" fill="#FFFFFF" />
             <rect x="20" y="80" width="280" height="140" rx="14" />
-            <rect x="120" y="20" width="90" height="70" rx="10" fill="#0A4D68" />
-            <rect x="135" y="35" width="60" height="20" rx="3" fill="#062E40" />
-            <rect x="210" y="42" width="6" height="60" fill="#2C3E4A" />
-            <path d="M210 100 L260 110 L260 130 L210 120 Z" fill="#2C3E4A" />
-            <rect x="60" y="100" width="80" height="44" rx="4" fill="#C6DEE5" />
+            <rect x="120" y="20" width="90" height="70" rx="10" fill="#3A3A3C" />
+            <rect x="135" y="35" width="60" height="20" rx="3" fill="#1D1D1F" />
+            <rect x="210" y="42" width="6" height="60" fill="#48484A" />
+            <path d="M210 100 L260 110 L260 130 L210 120 Z" fill="#48484A" />
+            <rect x="60" y="100" width="80" height="44" rx="4" fill="#E8E8ED" />
             <rect x="60" y="100" width="80" height="44" rx="4" />
-            <rect x="68" y="108" width="64" height="6" rx="1" fill="#25D366" opacity="0.4" />
-            <rect x="68" y="120" width="40" height="6" rx="1" fill="#25D366" opacity="0.6" />
-            <rect x="160" y="100" width="62" height="44" rx="4" fill="#062E40" />
-            <circle cx="175" cy="115" r="3" fill="#25D366" />
+            <rect x="68" y="108" width="64" height="6" rx="1" fill="#0071E3" opacity="0.4" />
+            <rect x="68" y="120" width="40" height="6" rx="1" fill="#0071E3" opacity="0.6" />
+            <rect x="160" y="100" width="62" height="44" rx="4" fill="#1D1D1F" />
+            <circle cx="175" cy="115" r="3" fill="#0071E3" />
             <circle cx="190" cy="115" r="3" fill="#C97A0C" />
-            <rect x="170" y="125" width="42" height="10" rx="2" fill="#0A4D68" />
-            <circle cx="65" cy="240" r="28" fill="#0F2330" />
-            <circle cx="65" cy="240" r="14" fill="#2C3E4A" />
-            <circle cx="65" cy="240" r="6" fill="#0A4D68" />
-            <circle cx="255" cy="240" r="28" fill="#0F2330" />
-            <circle cx="255" cy="240" r="14" fill="#2C3E4A" />
-            <circle cx="255" cy="240" r="6" fill="#0A4D68" />
-            <rect x="10" y="200" width="300" height="14" rx="3" fill="#0A4D68" />
-            <rect x="14" y="214" width="292" height="18" rx="2" fill="#25D366" opacity="0.5" />
-            <path d="M30 232 L30 254 M60 232 L60 256 M90 232 L90 254 M120 232 L120 256 M150 232 L150 254 M180 232 L180 256 M210 232 L210 254 M240 232 L240 256 M270 232 L270 254" stroke="#0A4D68" strokeWidth="0.8" />
-            <rect x="20" y="200" width="280" height="3" fill="#25D366" />
+            <rect x="170" y="125" width="42" height="10" rx="2" fill="#3A3A3C" />
+            <circle cx="65" cy="240" r="28" fill="#1D1D1F" />
+            <circle cx="65" cy="240" r="14" fill="#48484A" />
+            <circle cx="65" cy="240" r="6" fill="#3A3A3C" />
+            <circle cx="255" cy="240" r="28" fill="#1D1D1F" />
+            <circle cx="255" cy="240" r="14" fill="#48484A" />
+            <circle cx="255" cy="240" r="6" fill="#3A3A3C" />
+            <rect x="10" y="200" width="300" height="14" rx="3" fill="#3A3A3C" />
+            <rect x="14" y="214" width="292" height="18" rx="2" fill="#0071E3" opacity="0.5" />
+            <path d="M30 232 L30 254 M60 232 L60 256 M90 232 L90 254 M120 232 L120 256 M150 232 L150 254 M180 232 L180 256 M210 232 L210 254 M240 232 L240 256 M270 232 L270 254" stroke="#3A3A3C" strokeWidth="0.8" />
+            <rect x="20" y="200" width="280" height="3" fill="#0071E3" />
           </g>
-          <text x="120" y="190" fontFamily="Outfit" fontSize="14" fontWeight="500" fill="#0A4D68" letterSpacing="-0.02em">CleanVillage</text>
+          <text x="120" y="190" fontFamily="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" fontSize="14" fontWeight="500" fill="#3A3A3C" letterSpacing="-0.02em">CleanVillage</text>
         </svg>
 
         <div style={{ position: 'absolute', left: 20, bottom: 20, right: 20, background: 'rgba(255,255,255,0.96)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'var(--shadow-card)', zIndex: 4 }}>
@@ -160,7 +163,7 @@ function HeroVisual({ hero }) {
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Da</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 24, color: 'var(--fg-primary)', letterSpacing: '-0.03em' }}>{seller.price}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 24, color: 'var(--fg-primary)', letterSpacing: '-0.03em' }}>{seller.price}</div>
           </div>
         </div>
 
@@ -174,7 +177,7 @@ function HeroVisual({ hero }) {
 
       <div style={{ position: 'absolute', top: -18, left: -32, background: 'var(--color-teal-500)', color: 'var(--color-white)', borderRadius: 'var(--radius-md)', padding: '14px 18px', boxShadow: 'var(--shadow-pop)', maxWidth: 220 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-mint-300)', fontWeight: 600, marginBottom: 6 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-mint-500)', boxShadow: '0 0 0 4px rgba(37,211,102,0.25)' }} />
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-mint-500)', boxShadow: '0 0 0 4px rgba(0,113,227,0.25)' }} />
           {offer.eyebrow}
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 400, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
@@ -221,15 +224,15 @@ function CategoryShowcase() {
   return (
     <section style={{ padding: isMobile ? '64px 20px 48px' : '112px 32px 96px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 28 : 48, gap: 24, flexWrap: 'wrap' }}>
+        <Reveal style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 28 : 48, gap: 24, flexWrap: 'wrap' }}>
           <div>
             <Eyebrow>{section.eyebrow}</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '20ch', lineHeight: 1.04 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '20ch', lineHeight: 1.04 }}>
               {section.title}
             </h2>
           </div>
           {!isMobile && <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>{section.ctaAll}</Button>}
-        </div>
+        </Reveal>
 
         {style === 'magazine' && <>
           {isMobile ? (
@@ -238,16 +241,16 @@ function CategoryShowcase() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 20 }}>
+              <Reveal delay={80} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 20 }}>
                 <CategoryTile cat={cats[0]} index={0} size="xl" onClick={() => navigate('/catalog')} style={{ gridRow: 'span 2' }} />
                 <CategoryTile cat={cats[1]} index={1} onClick={() => navigate('/catalog')} />
                 <CategoryTile cat={cats[2]} index={2} onClick={() => navigate('/catalog')} />
                 <CategoryTile cat={cats[3]} index={3} onClick={() => navigate('/catalog')} />
                 <CategoryTile cat={cats[4]} index={4} onClick={() => navigate('/catalog')} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14, marginTop: 20 }}>
+              </Reveal>
+              <Reveal delay={160} style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14, marginTop: 20 }}>
                 {cats.slice(5).map(c => <CategoryPill key={c.id} cat={c} onClick={() => navigate('/catalog')} />)}
-              </div>
+              </Reveal>
             </>
           )}
         </>}
@@ -321,7 +324,7 @@ function CategoryTile({ cat, index = 0, size = 'md', onClick, style: extraStyle 
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 500, color: 'var(--fg-muted)', letterSpacing: '0.04em' }}>{String(index + 1).padStart(2, '0')}</div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: big ? 38 : 22, letterSpacing: '-0.03em', margin: '8px 0 0', lineHeight: 1.06, color: 'var(--fg-primary)', maxWidth: big ? '14ch' : '18ch' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: big ? 38 : 22, letterSpacing: '-0.03em', margin: '8px 0 0', lineHeight: 1.06, color: 'var(--fg-primary)', maxWidth: big ? '14ch' : '18ch' }}>
               {cat.label}
             </h3>
             {big && <FeaturedTileDescription />}
@@ -391,7 +394,11 @@ function PromoStrip() {
   return (
     <section style={{ padding: isMobile ? '0 20px 0' : '0 32px 0', background: 'var(--bg-page)', marginBottom: isMobile ? 56 : 96 }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : `repeat(${Math.min(3, promos.length)}, 1fr)`, gap: 16 }}>
-        {promos.map((p, i) => <PromoCard key={i} promo={p} index={i} onClick={() => navigate('/catalog')} />)}
+        {promos.map((p, i) => (
+          <Reveal key={i} delay={i * 100}>
+            <PromoCard promo={p} index={i} onClick={() => navigate('/catalog')} />
+          </Reveal>
+        ))}
       </div>
     </section>
   );
@@ -419,7 +426,7 @@ function PromoCard({ promo, index, onClick }) {
       }}>
         <ImageSlot id={`promo-${index}`} />
         {hasImage && (
-          <div style={{ position: 'absolute', inset: 0, background: dark ? 'linear-gradient(160deg, rgba(10,77,104,0.55) 0%, rgba(10,77,104,0.9) 100%)' : 'linear-gradient(160deg, rgba(0,102,255,0.55) 0%, rgba(0,102,255,0.9) 100%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, background: dark ? 'linear-gradient(160deg, rgba(29,29,31,0.55) 0%, rgba(29,29,31,0.9) 100%)' : 'linear-gradient(160deg, rgba(0,113,227,0.55) 0%, rgba(0,113,227,0.9) 100%)', pointerEvents: 'none' }} />
         )}
         {!hasImage && (
           <div style={{ position: 'absolute', right: -30, bottom: -20, width: '55%', opacity: 0.18, transform: hover ? 'scale(1.08)' : 'scale(1)', transition: 'transform var(--motion-slow)' }}>
@@ -430,7 +437,7 @@ function PromoCard({ promo, index, onClick }) {
           <span style={{ display: 'inline-block', padding: '4px 9px', borderRadius: 'var(--radius-xs)', background: 'rgba(255,255,255,0.15)', fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em' }}>
             {promo.tag}
           </span>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 26, letterSpacing: '-0.03em', margin: '14px 0 6px', color: 'var(--color-white)', lineHeight: 1.1 }}>{promo.title}</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 26, letterSpacing: '-0.03em', margin: '14px 0 6px', color: 'var(--color-white)', lineHeight: 1.1 }}>{promo.title}</h3>
           <p style={{ fontSize: 13, color: dark ? 'var(--color-teal-100)' : 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5, maxWidth: '34ch' }}>{promo.subtitle}</p>
         </div>
         <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, marginTop: 18 }}>
@@ -448,9 +455,9 @@ function HighlightedMachines() {
   const sec = content.highlights;
   // Visual presets per machine kind. Editable text comes from the content store.
   const VISUALS = {
-    scrubber: { bg: 'linear-gradient(160deg, #E8F2F5 0%, #C6DEE5 70%, #6FA1B0 100%)', tone: 'light', kind: 'scrubber', placeholder: 'Trascina qui la foto della lavasciuga' },
-    washer:   { bg: 'linear-gradient(160deg, #062E40 0%, #0A4D68 70%, #083D54 100%)', tone: 'dark',  kind: 'washer',   placeholder: "Trascina qui la foto dell'idropulitrice" },
-    vacuum:   { bg: 'linear-gradient(160deg, #F5F7F8 0%, #EBEFF1 60%, #D5DBDE 100%)', tone: 'light', kind: 'vacuum',   placeholder: "Trascina qui la foto dell'aspiraliquidi" },
+    scrubber: { bg: 'linear-gradient(160deg, #F5F5F7 0%, #E8E8ED 70%, #C7C7CC 100%)', tone: 'light', kind: 'scrubber', placeholder: 'Trascina qui la foto della lavasciuga' },
+    washer:   { bg: 'linear-gradient(160deg, #1D1D1F 0%, #3A3A3C 70%, #2C2C2E 100%)', tone: 'dark',  kind: 'washer',   placeholder: "Trascina qui la foto dell'idropulitrice" },
+    vacuum:   { bg: 'linear-gradient(160deg, #F5F5F7 0%, #E8E8ED 60%, #D2D2D7 100%)', tone: 'light', kind: 'vacuum',   placeholder: "Trascina qui la foto dell'aspiraliquidi" },
   };
   const machines = (sec.items || []).map((m, i) => {
     // Decide kind heuristically from id or fallback by index
@@ -461,19 +468,23 @@ function HighlightedMachines() {
   return (
     <section style={{ padding: isMobile ? '0 20px 64px' : '0 32px 112px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 32 : 48, gap: 24, paddingTop: 16, flexWrap: 'wrap' }}>
+        <Reveal style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 32 : 48, gap: 24, paddingTop: 16, flexWrap: 'wrap' }}>
           <div>
             <Eyebrow>{sec.eyebrow}</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
               {sec.title}
             </h2>
           </div>
           {!isMobile && <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: 0, maxWidth: '40ch' }}>
             {sec.intro}
           </p>}
-        </div>
+        </Reveal>
         <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 40 : 64 }}>
-          {machines.map((m, i) => <HighlightedRow key={m.id || i} m={m} index={i + 1} navigate={navigate} isMobile={isMobile} />)}
+          {machines.map((m, i) => (
+            <Reveal key={m.id || i}>
+              <HighlightedRow m={m} index={i + 1} navigate={navigate} isMobile={isMobile} />
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>
@@ -489,7 +500,7 @@ function HighlightedRow({ m, index, navigate, isMobile }) {
         <span style={{ width: 24, height: 1, background: 'var(--border-strong)' }} />
         <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-700)' }}>{m.eyebrow}</span>
       </div>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(32px, 3.6vw, 46px)', letterSpacing: '-0.035em', margin: 0, lineHeight: 1.04, textWrap: 'balance', color: 'var(--fg-primary)' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(32px, 3.6vw, 46px)', letterSpacing: '-0.035em', margin: 0, lineHeight: 1.04, textWrap: 'balance', color: 'var(--fg-primary)' }}>
         {m.name}
       </h3>
       <p style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 20, letterSpacing: '-0.02em', margin: 0, color: 'var(--color-teal-500)', lineHeight: 1.3, fontStyle: 'italic' }}>
@@ -560,20 +571,20 @@ function IndustriesGrid() {
   return (
     <section style={{ padding: isMobile ? '0 20px 56px' : '0 32px 96px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: isMobile ? 16 : 48, alignItems: 'end', marginBottom: isMobile ? 24 : 40 }}>
+        <Reveal style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: isMobile ? 16 : 48, alignItems: 'end', marginBottom: isMobile ? 24 : 40 }}>
           <div>
             <Eyebrow>{sec.eyebrow}</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.06 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(28px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.06 }}>
               {sec.title}
             </h2>
           </div>
           {!isMobile && <p style={{ fontSize: 15, color: 'var(--fg-secondary)', lineHeight: 1.6, margin: 0, maxWidth: '46ch' }}>
             {sec.intro}
           </p>}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+        </Reveal>
+        <Reveal delay={80} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
           {items.map((ind, i) => <IndustryCard key={ind.id} ind={ind} index={i + 1} />)}
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -624,9 +635,9 @@ function VideoAziendale() {
       <TrustBar height={3} />
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.3fr', gap: isMobile ? 36 : 64, alignItems: 'center' }}>
-          <div>
+          <Reveal>
             <Eyebrow dark>{sec.eyebrow}</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '-0.035em', margin: '18px 0 22px', textWrap: 'balance', color: 'var(--color-white)', lineHeight: 1.04 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '-0.035em', margin: '18px 0 22px', textWrap: 'balance', color: 'var(--color-white)', lineHeight: 1.04 }}>
               {sec.title}
             </h2>
             <p style={{ fontSize: 16, color: 'var(--color-teal-100)', maxWidth: '46ch', lineHeight: 1.6, margin: '0 0 36px', fontWeight: 400 }}>
@@ -646,9 +657,9 @@ function VideoAziendale() {
               )}
             </div>
             <Button variant="cta" size="lg" onClick={() => navigate('/contact')} iconRight={<Icon name="arrow-right" size={14} />}>{sec.cta}</Button>
-          </div>
+          </Reveal>
 
-          <div style={{ position: 'relative', aspectRatio: '16/10', background: '#062E40', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-teal-700)' }}>
+          <Reveal delay={120} style={{ position: 'relative', aspectRatio: '16/10', background: 'var(--color-teal-800)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-teal-700)' }}>
             {playing && heroVideo ? (
               <video
                 src={heroVideo.file_url}
@@ -667,47 +678,47 @@ function VideoAziendale() {
             {!hasPoster && !playing && (
             <svg viewBox="0 0 600 380" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
               <defs>
-                <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#C6DEE5" /><stop offset="1" stopColor="#6FA1B0" /></linearGradient>
-                <linearGradient id="floor" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#EBEFF1" /><stop offset="1" stopColor="#8E9AA2" /></linearGradient>
+                <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#E8E8ED" /><stop offset="1" stopColor="#C7C7CC" /></linearGradient>
+                <linearGradient id="floor" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#E8E8ED" /><stop offset="1" stopColor="#AEAEB2" /></linearGradient>
               </defs>
               <rect x="0" y="0" width="600" height="220" fill="url(#sky)" opacity="0.18" />
               <rect x="0" y="220" width="600" height="160" fill="url(#floor)" opacity="0.4" />
-              <path d="M0 220 L120 140 L260 200 L380 130 L600 200 L600 380 L0 380 Z" fill="#0A4D68" />
-              <path d="M0 220 L120 140 L260 200 L380 130 L600 200 L600 250 L0 250 Z" fill="#083D54" />
+              <path d="M0 220 L120 140 L260 200 L380 130 L600 200 L600 380 L0 380 Z" fill="#3A3A3C" />
+              <path d="M0 220 L120 140 L260 200 L380 130 L600 200 L600 250 L0 250 Z" fill="#2C2C2E" />
               {[0, 1, 2, 3, 4, 5, 6].map(i =>
                 <g key={i}>
-                  <rect x={60 + i * 72} y="240" width="56" height="100" fill="#062E40" />
-                  <rect x={60 + i * 72} y="252" width="56" height="3" fill="#0A4D68" />
-                  <rect x={60 + i * 72} y="280" width="56" height="3" fill="#0A4D68" />
-                  <rect x={60 + i * 72} y="308" width="56" height="3" fill="#0A4D68" />
-                  <rect x={64 + i * 72} y="255" width="48" height="22" fill="#25D366" opacity="0.18" />
-                  <rect x={64 + i * 72} y="283" width="48" height="22" fill="#C6DEE5" opacity="0.18" />
-                  <rect x={64 + i * 72} y="311" width="48" height="22" fill="#25D366" opacity="0.14" />
+                  <rect x={60 + i * 72} y="240" width="56" height="100" fill="#1D1D1F" />
+                  <rect x={60 + i * 72} y="252" width="56" height="3" fill="#3A3A3C" />
+                  <rect x={60 + i * 72} y="280" width="56" height="3" fill="#3A3A3C" />
+                  <rect x={60 + i * 72} y="308" width="56" height="3" fill="#3A3A3C" />
+                  <rect x={64 + i * 72} y="255" width="48" height="22" fill="#0071E3" opacity="0.18" />
+                  <rect x={64 + i * 72} y="283" width="48" height="22" fill="#E8E8ED" opacity="0.18" />
+                  <rect x={64 + i * 72} y="311" width="48" height="22" fill="#0071E3" opacity="0.14" />
                 </g>
               )}
               <g transform="translate(180, 290)">
-                <rect x="0" y="14" width="60" height="40" rx="3" fill="#25D366" />
-                <rect x="14" y="0" width="34" height="18" rx="2" fill="#0F2330" />
-                <rect x="56" y="34" width="60" height="6" fill="#2C3E4A" />
-                <rect x="62" y="20" width="6" height="36" fill="#2C3E4A" />
-                <rect x="62" y="24" width="50" height="6" fill="#C6DEE5" opacity="0.7" />
-                <circle cx="12" cy="58" r="6" fill="#0F2330" />
-                <circle cx="48" cy="58" r="6" fill="#0F2330" />
+                <rect x="0" y="14" width="60" height="40" rx="3" fill="#0071E3" />
+                <rect x="14" y="0" width="34" height="18" rx="2" fill="#1D1D1F" />
+                <rect x="56" y="34" width="60" height="6" fill="#48484A" />
+                <rect x="62" y="20" width="6" height="36" fill="#48484A" />
+                <rect x="62" y="24" width="50" height="6" fill="#E8E8ED" opacity="0.7" />
+                <circle cx="12" cy="58" r="6" fill="#1D1D1F" />
+                <circle cx="48" cy="58" r="6" fill="#1D1D1F" />
               </g>
               {[100, 240, 380, 500].map(x =>
                 <g key={x}>
-                  <rect x={x - 3} y="160" width="6" height="3" fill="#C8F5D8" opacity="0.7" />
-                  <path d={`M${x - 12} 163 L${x + 12} 163 L${x + 30} 220 L${x - 30} 220 Z`} fill="#C8F5D8" opacity="0.04" />
+                  <rect x={x - 3} y="160" width="6" height="3" fill="#D8E8FD" opacity="0.7" />
+                  <path d={`M${x - 12} 163 L${x + 12} 163 L${x + 30} 220 L${x - 30} 220 Z`} fill="#D8E8FD" opacity="0.04" />
                 </g>
               )}
             </svg>
             )}
             {!playing && (
               <>
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(6,46,64,0) 50%, rgba(6,46,64,0.6) 100%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%)' }} />
                 <button onClick={() => { if (heroVideo) setPlaying(true); else navigate('/contact'); }}
                   title={heroVideo ? 'Riproduci video' : 'Nessun video caricato — contattaci per un tour'}
-                  style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 92, height: 92, borderRadius: '50%', background: 'var(--color-mint-500)', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: '0 12px 40px rgba(6,46,64,0.5), var(--shadow-cta)' }}>
+                  style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 92, height: 92, borderRadius: '50%', background: 'var(--color-mint-500)', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: '0 12px 40px rgba(0,0,0,0.4), var(--shadow-cta)' }}>
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--color-white)" style={{ marginLeft: 3 }}><path d="M8 5v14l11-7z" /></svg>
                 </button>
                 <div style={{ position: 'absolute', left: 18, right: 18, bottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-white)', flexWrap: 'wrap', gap: 8 }}>
@@ -723,7 +734,7 @@ function VideoAziendale() {
                 </div>
               </>
             )}
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -739,10 +750,10 @@ function FormazioneCorsi() {
   return (
     <section style={{ background: 'var(--bg-surface)', padding: isMobile ? '64px 20px' : '112px 32px', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 1fr', gap: isMobile ? 20 : 64, alignItems: 'end', marginBottom: isMobile ? 28 : 48 }}>
+        <Reveal style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 1fr', gap: isMobile ? 20 : 64, alignItems: 'end', marginBottom: isMobile ? 28 : 48 }}>
           <div>
             <Eyebrow>{sec.eyebrow}</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(28px, 4.4vw, 54px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '22ch', lineHeight: 1.04 }}>
               {sec.title}
             </h2>
           </div>
@@ -754,10 +765,10 @@ function FormazioneCorsi() {
               {(sec.stats || []).map((s, i) => <FormStat key={i} value={s.value} label={s.label} />)}
             </div>
           </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 20 }}>
+        </Reveal>
+        <Reveal delay={80} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 20 }}>
           {courses.map((c, i) => <CourseCard key={c.id} c={c} index={i + 1} />)}
-        </div>
+        </Reveal>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginTop: 40, paddingTop: 28, borderTop: '1px solid var(--border-subtle)', gap: 24, flexDirection: isMobile ? 'column' : 'row' }}>
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 18, letterSpacing: '-0.02em', color: 'var(--fg-primary)' }}>{sec.closingTitle}</div>
@@ -776,7 +787,7 @@ function FormazioneCorsi() {
 function FormStat({ value, label }) {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 36, letterSpacing: '-0.035em', color: 'var(--color-teal-500)', lineHeight: 1 }}>{value}</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 36, letterSpacing: '-0.035em', color: 'var(--color-teal-500)', lineHeight: 1 }}>{value}</span>
       <span style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 600 }}>{label}</span>
     </div>
   );
@@ -817,7 +828,7 @@ function CourseCard({ c, index }) {
             <CourseMeta icon="calendar" label={c.nextDate} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 22, color: 'var(--fg-primary)', letterSpacing: '-0.03em' }}>{c.price}</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 22, color: 'var(--fg-primary)', letterSpacing: '-0.03em' }}>{c.price}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-mint-700)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               Iscriviti <Icon name="arrow-right" size={12} />
             </span>
@@ -841,42 +852,42 @@ function CourseGraphic({ kind }) {
   const wrap = { position: 'absolute', inset: 0 };
   switch (kind) {
     case 'safety': return (
-      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#0A4D68" strokeWidth="1.4">
+      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#3A3A3C" strokeWidth="1.4">
         <circle cx="160" cy="82" r="40" fill="#FFFFFF" />
-        <path d="M160 60 L145 76 V100 H175 V76 Z" fill="#25D366" opacity="0.6" />
-        <path d="M148 84 L156 92 L172 76" stroke="#0A4D68" strokeWidth="2" fill="none" />
-        <rect x="60" y="100" width="60" height="6" fill="#0A4D68" opacity="0.4" />
-        <rect x="200" y="100" width="60" height="6" fill="#0A4D68" opacity="0.4" />
+        <path d="M160 60 L145 76 V100 H175 V76 Z" fill="#0071E3" opacity="0.6" />
+        <path d="M148 84 L156 92 L172 76" stroke="#3A3A3C" strokeWidth="2" fill="none" />
+        <rect x="60" y="100" width="60" height="6" fill="#3A3A3C" opacity="0.4" />
+        <rect x="200" y="100" width="60" height="6" fill="#3A3A3C" opacity="0.4" />
       </svg>
     );
     case 'machine': return (
-      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#0A4D68" strokeWidth="1.4">
+      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#3A3A3C" strokeWidth="1.4">
         <rect x="110" y="50" width="100" height="50" rx="6" fill="#FFFFFF" />
-        <rect x="135" y="34" width="50" height="16" rx="3" fill="#0A4D68" />
-        <circle cx="130" cy="108" r="10" fill="#0F2330" />
-        <circle cx="190" cy="108" r="10" fill="#0F2330" />
-        <rect x="118" y="90" width="84" height="4" fill="#25D366" />
+        <rect x="135" y="34" width="50" height="16" rx="3" fill="#3A3A3C" />
+        <circle cx="130" cy="108" r="10" fill="#1D1D1F" />
+        <circle cx="190" cy="108" r="10" fill="#1D1D1F" />
+        <rect x="118" y="90" width="84" height="4" fill="#0071E3" />
         <path d="M50 70 L100 70 M220 70 L270 70" strokeDasharray="2 4" />
       </svg>
     );
     case 'chemicals': return (
-      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#0A4D68" strokeWidth="1.4">
+      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#3A3A3C" strokeWidth="1.4">
         <rect x="130" y="40" width="30" height="70" rx="3" fill="#FFFFFF" />
         <rect x="165" y="30" width="30" height="80" rx="3" fill="#FFFFFF" />
-        <rect x="135" y="60" width="20" height="20" fill="#25D366" opacity="0.5" />
-        <rect x="170" y="58" width="20" height="32" fill="#25D366" opacity="0.7" />
+        <rect x="135" y="60" width="20" height="20" fill="#0071E3" opacity="0.5" />
+        <rect x="170" y="58" width="20" height="32" fill="#0071E3" opacity="0.7" />
         <path d="M137 40 L137 30 L153 30 L153 40 M172 30 L172 22 L188 22 L188 30" />
       </svg>
     );
     case 'sales': return (
-      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#0A4D68" strokeWidth="1.4">
+      <svg viewBox="0 0 320 140" style={wrap} fill="none" stroke="#3A3A3C" strokeWidth="1.4">
         <rect x="80" y="45" width="160" height="70" rx="6" fill="#FFFFFF" />
-        <rect x="95" y="58" width="40" height="6" fill="#0A4D68" opacity="0.4" />
-        <rect x="95" y="72" width="80" height="6" fill="#0A4D68" opacity="0.4" />
-        <rect x="95" y="86" width="50" height="6" fill="#25D366" />
-        <path d="M180 100 L195 80 L210 90 L225 65" strokeWidth="2" stroke="#25D366" />
-        <circle cx="180" cy="100" r="3" fill="#25D366" />
-        <circle cx="225" cy="65" r="3" fill="#25D366" />
+        <rect x="95" y="58" width="40" height="6" fill="#3A3A3C" opacity="0.4" />
+        <rect x="95" y="72" width="80" height="6" fill="#3A3A3C" opacity="0.4" />
+        <rect x="95" y="86" width="50" height="6" fill="#0071E3" />
+        <path d="M180 100 L195 80 L210 90 L225 65" strokeWidth="2" stroke="#0071E3" />
+        <circle cx="180" cy="100" r="3" fill="#0071E3" />
+        <circle cx="225" cy="65" r="3" fill="#0071E3" />
       </svg>
     );
     default: return null;
@@ -894,18 +905,18 @@ function FeaturedProducts() {
   return (
     <section style={{ padding: isMobile ? '64px 20px' : '112px 32px', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 24 : 40, gap: 24, flexWrap: 'wrap' }}>
+        <Reveal style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: isMobile ? 24 : 40, gap: 24, flexWrap: 'wrap' }}>
           <div>
             <Eyebrow>{sec.eyebrow}</Eyebrow>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(28px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '24ch' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(28px, 3.6vw, 44px)', letterSpacing: '-0.035em', margin: '14px 0 0', textWrap: 'balance', maxWidth: '24ch' }}>
               {sec.title}
             </h2>
           </div>
           {!isMobile && <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>{sec.ctaAll}</Button>}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? 14 : 20 }}>
+        </Reveal>
+        <Reveal delay={80} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? 14 : 20 }}>
           {featured.map(p => <ProductCard key={p.id} product={p} onClick={() => navigate(`/product/${p.id}`)} />)}
-        </div>
+        </Reveal>
         {isMobile && (
           <div style={{ marginTop: 20, textAlign: 'center' }}>
             <Button variant="ghost" onClick={() => navigate('/catalog')} iconRight={<Icon name="arrow-right" size={14} />}>{sec.ctaAll}</Button>
@@ -927,9 +938,9 @@ function QuoteCTA() {
     <section style={{ background: 'var(--bg-inverse)', color: 'var(--color-white)', position: 'relative', overflow: 'hidden' }}>
       <TrustBar height={3} />
       <div style={{ maxWidth: 'var(--max-content)', margin: '0 auto', padding: isMobile ? '64px 20px' : '96px 32px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 32 : 64, alignItems: 'center' }}>
-        <div>
+        <Reveal>
           <Eyebrow dark>{sec.eyebrow}</Eyebrow>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(38px, 4.6vw, 56px)', letterSpacing: '-0.035em', color: 'var(--color-white)', margin: '18px 0 22px', textWrap: 'balance', lineHeight: 1.04 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 'clamp(38px, 4.6vw, 56px)', letterSpacing: '-0.035em', color: 'var(--color-white)', margin: '18px 0 22px', textWrap: 'balance', lineHeight: 1.04 }}>
             {sec.title}
           </h2>
           <p style={{ fontSize: 16, color: 'var(--color-teal-100)', maxWidth: '52ch', margin: 0, lineHeight: 1.6 }}>
@@ -942,8 +953,8 @@ function QuoteCTA() {
               </span>
             ))}
           </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        </Reveal>
+        <Reveal delay={120} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Button variant="cta" size="lg" full onClick={() => navigate('/contact')} iconRight={<Icon name="arrow-right" size={14} />}>{content.hero.ctaPrimary}</Button>
           <a href={telHref} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', border: '1px solid var(--color-teal-700)', borderRadius: 'var(--radius-sm)', color: 'var(--color-white)', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600 }}><Icon name="phone" size={15} /> {sec.callLabel}</span>
@@ -953,7 +964,7 @@ function QuoteCTA() {
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600 }}><Icon name="mail" size={15} /> {sec.emailLabel}</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-teal-100)', wordBreak: 'break-all' }}>{co.emailPrimary}</span>
           </a>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

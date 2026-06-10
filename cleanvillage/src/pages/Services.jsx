@@ -29,7 +29,7 @@ export default function Services() {
             <span style={{ color: 'var(--fg-primary)' }}>Servizi</span>
           </div>
           <Eyebrow>{page.eyebrow}</Eyebrow>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 200, fontSize: 'clamp(36px, 5.4vw, 64px)', letterSpacing: '-0.04em', margin: '14px 0 18px', lineHeight: 1.04, textWrap: 'balance', maxWidth: '22ch' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(36px, 5.4vw, 64px)', letterSpacing: '-0.04em', margin: '14px 0 18px', lineHeight: 1.04, textWrap: 'balance', maxWidth: '22ch' }}>
             {page.title}
           </h1>
           <p style={{ margin: 0, color: 'var(--fg-secondary)', fontSize: isMobile ? 15 : 17, maxWidth: '64ch', lineHeight: 1.65 }}>

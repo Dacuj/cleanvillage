@@ -232,7 +232,7 @@ function KPICard({ label, value, tone, icon, desc }) {
           <AdminIcon name={icon} size={14} />
         </span>
       </div>
-      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 32, letterSpacing: '-0.035em', color: 'var(--fg-primary)', lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 650, fontSize: 32, letterSpacing: '-0.035em', color: 'var(--fg-primary)', lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{desc}</div>
     </div>
   );

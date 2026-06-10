@@ -1,47 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+/* ============================================================
+   CLEANVILLAGE DESIGN SYSTEM — Apple-grade minimalism
+   Neutral surfaces, one blue accent, system typography,
+   generous radii, soft diffuse shadows, fluid motion.
+   ============================================================ */
 
 :root {
-  --color-teal-50:     #E8F2F5;
-  --color-teal-100:    #C6DEE5;
-  --color-teal-300:    #6FA1B0;
-  --color-teal-500:    #0A4D68;
-  --color-teal-700:    #083D54;
-  --color-teal-800:    #062E40;
+  /* Brand graphite scale (was teal — same var names so the whole
+     app retunes automatically). */
+  --color-teal-50:     #F5F5F7;
+  --color-teal-100:    #D2D2D7;
+  --color-teal-300:    #86868B;
+  --color-teal-500:    #1D1D1F;
+  --color-teal-700:    #313135;
+  --color-teal-800:    #0B0B0C;
 
-  /* Accent (CTA). Production palette = electric blue. */
-  --color-mint-50:     #E6EFFF;
-  --color-mint-100:    #CCDFFF;
-  --color-mint-300:    #66A3FF;
-  --color-mint-500:    #0066FF;
-  --color-mint-600:    #0052CC;
-  --color-mint-700:    #003D99;
-  --color-mint-800:    #002966;
+  /* Accent (CTA) — Apple blue. */
+  --color-mint-50:     #EDF4FE;
+  --color-mint-100:    #D8E8FD;
+  --color-mint-300:    #6CB1F6;
+  --color-mint-500:    #0071E3;
+  --color-mint-600:    #0077ED;
+  --color-mint-700:    #0066CC;
+  --color-mint-800:    #00408F;
 
   --color-white:       #FFFFFF;
-  --color-ice-50:      #F5F7F8;
-  --color-ice-100:     #EBEFF1;
-  --color-ice-200:     #D5DBDE;
-  --color-ice-300:     #B7C0C5;
-  --color-ice-400:     #8E9AA2;
-  --color-ice-500:     #6B7882;
-  --color-ice-600:     #4A5D6B;
-  --color-ice-700:     #2C3E4A;
+  /* Neutral gray scale. */
+  --color-ice-50:      #F5F5F7;
+  --color-ice-100:     #E8E8ED;
+  --color-ice-200:     #D2D2D7;
+  --color-ice-300:     #AEAEB2;
+  --color-ice-400:     #86868B;
+  --color-ice-500:     #6E6E73;
+  --color-ice-600:     #515154;
+  --color-ice-700:     #424245;
 
-  --color-ink:         #0F2330;
-  --color-ink-soft:    #2C3E4A;
+  --color-ink:         #1D1D1F;
+  --color-ink-soft:    #424245;
 
-  --color-success-500: #1F7A4D;
-  --color-success-100: #D8F0E2;
-  --color-warning-500: #C97A0C;
-  --color-warning-100: #FBE7C8;
-  --color-danger-500:  #B42318;
-  --color-danger-100:  #FCDDD9;
+  --color-success-500: #248A3D;
+  --color-success-100: #E2F6E8;
+  --color-warning-500: #B25000;
+  --color-warning-100: #FBEEDF;
+  --color-danger-500:  #D70015;
+  --color-danger-100:  #FCE4E4;
 
-  --bg-page:             var(--color-ice-50);
+  --bg-page:             #FBFBFD;
   --bg-surface:          var(--color-white);
-  --bg-surface-alt:      var(--color-ice-100);
+  --bg-surface-alt:      var(--color-ice-50);
   --bg-inverse:          var(--color-teal-500);
-  --bg-inverse-alt:      var(--color-teal-700);
+  --bg-inverse-alt:      var(--color-teal-800);
 
   --fg-primary:          var(--color-ink);
   --fg-secondary:        var(--color-ink-soft);
@@ -59,16 +66,17 @@
   --cta-bg-press:         var(--color-mint-700);
   --cta-fg:               var(--color-white);
 
-  --border-subtle:       var(--color-ice-100);
-  --border-default:      var(--color-ice-200);
-  --border-strong:       var(--color-ice-300);
-  --border-inverse:      var(--color-teal-700);
+  --border-subtle:       rgba(0, 0, 0, 0.07);
+  --border-default:      rgba(0, 0, 0, 0.12);
+  --border-strong:       rgba(0, 0, 0, 0.22);
+  --border-inverse:      rgba(255, 255, 255, 0.16);
 
-  --focus-ring:          var(--color-teal-500);
+  --focus-ring:          var(--color-mint-500);
 
-  --font-display: 'Outfit', system-ui, sans-serif;
-  --font-body:    'IBM Plex Sans', system-ui, -apple-system, Segoe UI, sans-serif;
-  --font-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* SF on Apple devices, best native equivalent elsewhere. */
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Roboto, Inter, Arial, sans-serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Roboto, Inter, Arial, sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 
   --fs-xs:    12px;
   --fs-sm:    14px;
@@ -81,7 +89,7 @@
   --fs-5xl:   64px;
   --fs-6xl:   84px;
 
-  --lh-tight: 1.02;
+  --lh-tight: 1.05;
   --lh-snug:  1.18;
   --lh-base:  1.55;
   --lh-loose: 1.7;
@@ -103,31 +111,43 @@
   --space-10:  128px;
 
   --radius-none: 0;
-  --radius-xs:   4px;
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   14px;
-  --radius-pill: 999px;
+  --radius-xs:   8px;
+  --radius-sm:   12px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-pill: 980px;
 
-  --shadow-card: 0 1px 2px rgba(10,77,104,.06), 0 1px 0 rgba(10,77,104,.04);
-  --shadow-pop:  0 8px 24px rgba(10,77,104,.10), 0 2px 6px rgba(10,77,104,.06);
-  --shadow-cta:  0 4px 14px rgba(0,102,255,.32);
-  --shadow-focus: 0 0 0 3px rgba(10,77,104,.20);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 12px rgba(0, 0, 0, 0.04);
+  --shadow-pop:  0 12px 40px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-cta:  0 6px 20px rgba(0, 113, 227, 0.30);
+  --shadow-focus: 0 0 0 4px rgba(0, 113, 227, 0.22);
 
   --border-card:       1px solid var(--border-subtle);
   --border-card-hover: 1px solid var(--border-strong);
   --border-input:      1px solid var(--border-default);
   --border-divider:    1px solid var(--border-subtle);
 
-  --motion-fast: 120ms ease-out;
-  --motion-base: 200ms ease-in-out;
-  --motion-slow: 320ms cubic-bezier(.2,.8,.2,1);
+  /* Apple-style motion: fast in, long settle. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.3, 0.64, 1);
+  --motion-fast: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-base: 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-slow: 560ms var(--ease-out-expo);
 
   --max-content: 1280px;
-  --header-h:    72px;
+  --header-h:    68px;
   --header-h-sm: 56px;
 
-  --trust-bar: linear-gradient(90deg, var(--color-teal-500) 0%, var(--color-teal-500) 60%, var(--color-mint-500) 100%);
+  /* Legacy gradient strip — invisible in the minimal theme. */
+  --trust-bar: transparent;
+
+  /* Glass chrome */
+  --glass-bg:     rgba(251, 251, 253, 0.78);
+  --glass-blur:   saturate(180%) blur(20px);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html, body {
@@ -137,6 +157,7 @@ html, body {
   color:       var(--fg-primary);
   background:  var(--bg-page);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   margin: 0;
   padding: 0;
@@ -146,12 +167,22 @@ html, body {
   box-sizing: border-box;
 }
 
+::selection {
+  background: rgba(0, 113, 227, 0.18);
+}
+
+:focus-visible {
+  outline: 3px solid rgba(0, 113, 227, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 h1, .cv-h1 {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 700;
   font-size: clamp(44px, 6vw, var(--fs-5xl));
-  line-height: 1.04;
-  letter-spacing: -0.035em;
+  line-height: 1.05;
+  letter-spacing: -0.022em;
   color: var(--fg-primary);
   margin: 0 0 var(--space-5);
   text-wrap: balance;
@@ -159,10 +190,10 @@ h1, .cv-h1 {
 
 h2, .cv-h2 {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 700;
   font-size: var(--fs-3xl);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  line-height: 1.08;
+  letter-spacing: -0.018em;
   color: var(--fg-primary);
   margin: 0 0 var(--space-4);
   text-wrap: balance;
@@ -170,20 +201,20 @@ h2, .cv-h2 {
 
 h3, .cv-h3 {
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 600;
   font-size: var(--fs-2xl);
-  line-height: 1.18;
-  letter-spacing: -0.025em;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
   color: var(--fg-primary);
   margin: 0 0 var(--space-3);
 }
 
 h4, .cv-h4 {
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 600;
   font-size: var(--fs-xl);
   line-height: 1.2;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.012em;
   color: var(--fg-primary);
   margin: 0 0 var(--space-2);
 }
@@ -198,15 +229,12 @@ p, .cv-p {
 }
 
 a {
-  color: var(--color-teal-500);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
-  transition: color var(--motion-fast), text-decoration-thickness var(--motion-fast);
+  color: var(--color-mint-500);
+  text-decoration: none;
+  transition: color var(--motion-fast), opacity var(--motion-fast);
 }
 a:hover {
-  color: var(--color-teal-700);
-  text-decoration-thickness: 2px;
+  color: var(--color-mint-700);
 }
 
 .cv-eyebrow {
@@ -223,12 +251,91 @@ a:hover {
 }
 
 .cv-trust-bar {
-  display: block;
-  height: 4px;
-  background: var(--trust-bar);
+  display: none;
 }
+
+/* ============================================================
+   MOTION — scroll-reveal, keyframes, micro-interactions
+   ============================================================ */
 
 @keyframes cvMarquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+
+@keyframes cvFadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes cvFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cvScaleIn {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes cvSlideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: none; }
+}
+
+@keyframes cvSlideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: none; }
+}
+
+@keyframes cvSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes cvPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* Scroll-reveal: pair with the <Reveal> component. */
+.cv-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.cv-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.cv-anim-fade-up  { animation: cvFadeUp 0.8s var(--ease-out-expo) both; }
+.cv-anim-fade-in  { animation: cvFadeIn 0.5s ease both; }
+.cv-anim-scale-in { animation: cvScaleIn 0.32s var(--ease-out-expo) both; }
+.cv-anim-spin     { animation: cvSpin 0.9s linear infinite; }
+
+/* Interactive lift used on cards/links. */
+.cv-lift {
+  transition: transform var(--motion-base), box-shadow var(--motion-base);
+}
+.cv-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-pop);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .cv-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }

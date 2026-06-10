@@ -17,8 +17,8 @@ function MegaCategories({ onClose }) {
   const cats = CV_CATEGORIES;
   const go = (path) => { navigate(path); onClose(); };
   return (
-    <div onMouseLeave={onClose}
-      style={{ position: 'absolute', top: '100%', left: -32, right: -32, marginTop: 0, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderTop: 'none', boxShadow: 'var(--shadow-pop)', padding: '28px 32px 24px', zIndex: 20 }}>
+    <div onMouseLeave={onClose} className="cv-anim-scale-in"
+      style={{ position: 'absolute', top: 'calc(100% + 10px)', left: -32, right: -32, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-pop)', padding: '28px 32px 24px', zIndex: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
         <Eyebrow>Tutte le categorie</Eyebrow>
         <a href="/catalog" onClick={(e) => { e.preventDefault(); go('/catalog'); }} style={{ fontSize: 12, color: 'var(--color-teal-500)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -48,8 +48,8 @@ function MegaBrands({ onClose }) {
   const brands = CV_BRANDS;
   const go = (b) => { navigate(`/catalog?brand=${encodeURIComponent(b.name)}`); onClose(); };
   return (
-    <div onMouseLeave={onClose}
-      style={{ position: 'absolute', top: '100%', left: -32, right: -32, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderTop: 'none', boxShadow: 'var(--shadow-pop)', padding: '28px 32px 26px', zIndex: 20 }}>
+    <div onMouseLeave={onClose} className="cv-anim-scale-in"
+      style={{ position: 'absolute', top: 'calc(100% + 10px)', left: -32, right: -32, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-pop)', padding: '28px 32px 26px', zIndex: 20 }}>
       <Eyebrow>Marchi distribuiti</Eyebrow>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginTop: 14 }}>
         {brands.map(b => (
@@ -70,8 +70,8 @@ function MobileDrawer({ onClose }) {
   const go = (path) => { navigate(path); onClose(); };
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40, touchAction: 'none' }} aria-hidden="true" />
-      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '88vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div onClick={onClose} className="cv-anim-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', zIndex: 40, touchAction: 'none' }} aria-hidden="true" />
+      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '88vw', maxWidth: 360, background: 'var(--bg-surface)', zIndex: 50, overflowY: 'auto', display: 'flex', flexDirection: 'column', borderRadius: '24px 0 0 24px', boxShadow: 'var(--shadow-pop)', animation: 'cvSlideInRight 0.4s var(--ease-out-expo) both' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
           <Logo size="md" />
           <button onClick={onClose} aria-label="Chiudi menu" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, color: 'var(--fg-secondary)' }}>
@@ -174,12 +174,11 @@ export function Header() {
   return (
     <header style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: isMobile ? 'var(--bg-surface)' : 'rgba(255,255,255,0.96)',
+      background: 'var(--glass-bg)',
       borderBottom: '1px solid var(--border-subtle)',
-      backdropFilter: isMobile ? 'none' : 'blur(10px)',
-      WebkitBackdropFilter: isMobile ? 'none' : 'blur(10px)',
+      backdropFilter: 'var(--glass-blur)',
+      WebkitBackdropFilter: 'var(--glass-blur)',
       isolation: 'isolate',
-      boxShadow: isMobile ? '0 1px 2px rgba(10,77,104,0.06)' : 'none',
     }}>
       {/* utility strip - desktop only */}
       {!isMobile && (
@@ -241,7 +240,7 @@ export function Header() {
             <input
               value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Cerca prodotti, codici, marchi…"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-50)', border: '1px solid transparent', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--fg-primary)' }}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '9px 14px 9px 34px', fontFamily: 'var(--font-body)', fontSize: 13, background: 'var(--color-ice-100)', border: '1px solid transparent', borderRadius: 'var(--radius-pill)', outline: 'none', color: 'var(--fg-primary)', transition: 'background var(--motion-fast)' }}
             />
           </form>
         )}
@@ -254,7 +253,7 @@ export function Header() {
 
         {isMobile ? (
           <>
-            <button onClick={() => navigate('/contact')} style={{ height: 44, padding: '0 14px', background: 'var(--cta-bg)', color: 'var(--color-white)', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <button onClick={() => navigate('/contact')} style={{ height: 40, padding: '0 16px', background: 'var(--cta-bg)', color: 'var(--color-white)', border: 'none', borderRadius: 'var(--radius-pill)', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
               Preventivo
             </button>
             <button
@@ -284,7 +283,7 @@ export function Footer() {
   const directions = buildDirectionsUrl(co.operationalAddress);
   const Col = ({ title, children }) => (
     <div>
-      <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-mint-300)', marginBottom: 18 }}>{title}</div>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', marginBottom: 18 }}>{title}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>{children}</div>
     </div>
   );

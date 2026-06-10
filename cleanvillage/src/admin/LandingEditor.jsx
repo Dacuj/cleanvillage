@@ -145,24 +145,18 @@ export default function LandingEditor() {
           <AInput value={content.hero.eyebrow} onChange={(e) => update('hero.eyebrow', e.target.value)} />
         </AField>
         <Grid cols={2}>
-          <AField label="Titolo — tono umano" hint="Il default. La parola in verde è specificata sotto.">
+          <AField label="Titolo principale" hint="La parola evidenziata in blu è specificata a destra.">
             <ATextarea rows={2} value={content.hero.titleHuman} onChange={(e) => update('hero.titleHuman', e.target.value)} />
           </AField>
-          <AField label="Parola in verde (tono umano)">
+          <AField label="Parola evidenziata (in blu)" hint="Deve comparire esattamente nel titolo.">
             <AInput value={content.hero.titleHumanAccent} onChange={(e) => update('hero.titleHumanAccent', e.target.value)} />
-          </AField>
-          <AField label="Titolo — tono tecnico" hint="Usato quando si attiva il tweak 'Tecnico'">
-            <ATextarea rows={2} value={content.hero.titleTechnical} onChange={(e) => update('hero.titleTechnical', e.target.value)} />
-          </AField>
-          <AField label="Parola in verde (tono tecnico)">
-            <AInput value={content.hero.titleTechnicalAccent} onChange={(e) => update('hero.titleTechnicalAccent', e.target.value)} />
           </AField>
         </Grid>
         <AField label="Sottotitolo (paragrafo sotto al titolo)">
           <ATextarea rows={3} value={content.hero.subtitle} onChange={(e) => update('hero.subtitle', e.target.value)} />
         </AField>
         <Grid cols={2}>
-          <AField label="Bottone primario (verde)">
+          <AField label="Bottone primario (blu)">
             <AInput value={content.hero.ctaPrimary} onChange={(e) => update('hero.ctaPrimary', e.target.value)} />
           </AField>
           <AField label="Bottone secondario">
@@ -204,7 +198,7 @@ export default function LandingEditor() {
           }}>Aggiungi statistica</ABtn>
         </SubSection>
 
-        <SubSection title="Badge offerta (riquadro verde piccolo in alto a sinistra)">
+        <SubSection title="Badge offerta (riquadro scuro in alto a sinistra dell'immagine)">
           <Grid cols={2}>
             <AField label="Eyebrow">
               <AInput value={content.hero.badgeOffer.eyebrow} onChange={(e) => update('hero.badgeOffer.eyebrow', e.target.value)} />
@@ -235,7 +229,7 @@ export default function LandingEditor() {
             <AField label="Specifiche brevi">
               <AInput value={content.hero.sellerBadge.specs} onChange={(e) => update('hero.sellerBadge.specs', e.target.value)} />
             </AField>
-            <AField label="Disponibilità (badge verde)">
+            <AField label="Disponibilità (badge blu)">
               <AInput value={content.hero.sellerBadge.availability} onChange={(e) => update('hero.sellerBadge.availability', e.target.value)} />
             </AField>
           </Grid>
@@ -297,8 +291,8 @@ export default function LandingEditor() {
               </AField>
               <AField label="Colore">
                 <select className="cv-admin-select" value={p.color} onChange={(e) => update(`promos.${i}.color`, e.target.value)} style={{ fontFamily: 'var(--font-body)', fontSize: 13, padding: '9px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', width: '100%', boxSizing: 'border-box' }}>
-                  <option value="mint">Verde (mint)</option>
-                  <option value="teal">Blu (teal)</option>
+                  <option value="mint">Blu acceso</option>
+                  <option value="teal">Grafite scuro</option>
                 </select>
               </AField>
             </Grid>
@@ -395,7 +389,7 @@ export default function LandingEditor() {
           <AField label="Eyebrow">
             <AInput value={content.video.eyebrow} onChange={(e) => update('video.eyebrow', e.target.value)} />
           </AField>
-          <AField label="CTA (bottone verde)">
+          <AField label="CTA (bottone blu)">
             <AInput value={content.video.cta} onChange={(e) => update('video.cta', e.target.value)} />
           </AField>
         </Grid>
@@ -1038,15 +1032,17 @@ function ImageSlotEditor({ slot, content }) {
   const inputRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
+  const [done, setDone] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const current = resolveImageSlot(content, slot.id);
 
   const handleFile = async (file) => {
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!file) return;
     if (!isSupabaseConfigured) {
-      setErr('Supabase non configurato — impossibile caricare in cloud.');
+      setErr('Supabase non configurato — impossibile pubblicare la foto online.');
       return;
     }
-    setBusy(true); setErr(null);
+    setBusy(true); setErr(null); setDone(false);
     try {
       // Delete the previous storage object if any.
       if (current?.storage_path) {
@@ -1057,8 +1053,10 @@ function ImageSlotEditor({ slot, content }) {
         ...c,
         images: { ...(c.images || {}), [slot.id]: uploaded },
       }));
+      setDone(true);
+      setTimeout(() => setDone(false), 2600);
     } catch (e) {
-      setErr(e.message || 'Errore upload.');
+      setErr(e.message || 'Errore durante il caricamento. Riprova.');
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -1066,6 +1064,7 @@ function ImageSlotEditor({ slot, content }) {
   };
 
   const clearImage = async () => {
+    if (!confirm('Rimuovere questa foto dal sito?')) return;
     if (current?.storage_path) {
       await deleteLandingImage(current.storage_path).catch(() => {});
     }
@@ -1077,17 +1076,57 @@ function ImageSlotEditor({ slot, content }) {
     try { localStorage.removeItem(`imgslot:${slot.id}`); } catch { /* */ }
   };
 
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleFile(file);
+  };
+
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: 14, display: 'flex', gap: 14 }}>
-      <div style={{ width: 120, aspectRatio: '4/3', background: 'var(--color-ice-100)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, display: 'grid', placeItems: 'center', position: 'relative' }}>
+    <div
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={onDrop}
+      style={{
+        background: dragOver ? 'var(--color-mint-50)' : 'var(--bg-surface)',
+        border: dragOver ? '2px dashed var(--color-mint-500)' : '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-md)', padding: 14,
+        display: 'flex', flexDirection: 'column', gap: 12,
+        transition: 'background var(--motion-fast), border-color var(--motion-fast)',
+      }}
+    >
+      <div
+        onClick={() => !busy && inputRef.current?.click()}
+        role="button"
+        title={current ? 'Clicca per sostituire la foto' : 'Clicca o trascina qui una foto'}
+        style={{
+          aspectRatio: '16/9', background: 'var(--color-ice-100)', borderRadius: 'var(--radius-sm)',
+          overflow: 'hidden', display: 'grid', placeItems: 'center', position: 'relative',
+          cursor: busy ? 'wait' : 'pointer',
+        }}
+      >
         {current ? (
-          <img src={current.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={current.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: busy ? 0.4 : 1, transition: 'opacity var(--motion-fast)' }} />
         ) : (
-          <AdminIcon name="image" size={28} color="var(--fg-muted)" />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: 'var(--fg-muted)', padding: 12, textAlign: 'center' }}>
+            <AdminIcon name="image-plus" size={30} />
+            <span style={{ fontSize: 12, lineHeight: 1.45 }}>Trascina qui la foto<br />oppure clicca per sceglierla</span>
+          </div>
+        )}
+        {busy && (
+          <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,0.55)' }}>
+            <span className="cv-anim-spin" style={{ width: 26, height: 26, border: '3px solid var(--color-ice-200)', borderTopColor: 'var(--color-mint-500)', borderRadius: '50%' }} />
+          </div>
+        )}
+        {done && !busy && (
+          <div className="cv-anim-scale-in" style={{ position: 'absolute', top: 10, right: 10, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 999, background: 'var(--color-success-500)', color: 'var(--color-white)', fontSize: 11, fontWeight: 600 }}>
+            <AdminIcon name="check" size={12} /> Pubblicata
+          </div>
         )}
       </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 500, color: 'var(--fg-primary)' }}>{slot.label}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: 'var(--fg-primary)' }}>{slot.label}</div>
         <div style={{ fontSize: 11, color: 'var(--fg-muted)', lineHeight: 1.5 }}>{slot.desc}</div>
         {current?.legacy && (
           <div style={{ fontSize: 10, color: 'var(--color-warning-500)', fontFamily: 'var(--font-mono)' }}>
@@ -1095,12 +1134,14 @@ function ImageSlotEditor({ slot, content }) {
           </div>
         )}
         {err && (
-          <div style={{ fontSize: 11, color: 'var(--color-danger-500)' }}>{err}</div>
+          <div style={{ fontSize: 12, color: 'var(--color-danger-500)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <AdminIcon name="alert-circle" size={13} /> {err}
+          </div>
         )}
-        <div style={{ marginTop: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFile(e.target.files?.[0])} />
+        <div style={{ marginTop: 4, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" style={{ display: 'none' }} onChange={(e) => handleFile(e.target.files?.[0])} />
           <ABtn size="sm" variant="secondary" icon={<AdminIcon name={busy ? 'loader' : 'upload'} size={12} />} onClick={() => inputRef.current?.click()} disabled={busy}>
-            {busy ? 'Carico…' : current ? 'Sostituisci' : 'Carica'}
+            {busy ? 'Carico…' : current ? 'Sostituisci foto' : 'Carica foto'}
           </ABtn>
           {current && !busy && (
             <ABtn size="sm" variant="ghost" icon={<AdminIcon name="trash-2" size={12} />} onClick={clearImage}>
